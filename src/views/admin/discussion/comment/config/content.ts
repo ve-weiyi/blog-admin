@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryCommentListReq> = {
     return CommentAPI.queryCommentList(query);
   },
   deleteAction(ids: string) {
-    return CommentAPI.deleteComment({
+    return CommentAPI.batchDeleteComment({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

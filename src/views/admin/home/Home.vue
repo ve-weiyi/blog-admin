@@ -175,7 +175,7 @@
 
       <!-- 用户量 -->
       <el-col :xs="8" :sm="8" :md="4">
-        <el-card shadow="never" :loading="articleAnalyticsLoading" class="h-full">
+        <el-card shadow="never" :loading="articlestatsLoading" class="h-full">
           <template #header>
             <div class="flex-x-between">
               <span class="text-gray">用户量</span>
@@ -199,7 +199,7 @@
 
       <!-- 文章量 -->
       <el-col :xs="8" :sm="8" :md="4">
-        <el-card shadow="never" :loading="articleAnalyticsLoading" class="h-full">
+        <el-card shadow="never" :loading="articlestatsLoading" class="h-full">
           <template #header>
             <div class="flex-x-between">
               <span class="text-gray">文章量</span>
@@ -223,7 +223,7 @@
 
       <!-- 留言量 -->
       <el-col :xs="8" :sm="8" :md="4">
-        <el-card shadow="never" :loading="articleAnalyticsLoading" class="h-full">
+        <el-card shadow="never" :loading="articlestatsLoading" class="h-full">
           <template #header>
             <div class="flex-x-between">
               <span class="text-gray">留言量</span>
@@ -327,34 +327,34 @@
     <!-- 图表 -->
     <el-row :gutter="32" style="margin-top: 32px">
       <el-col :xs="24" :sm="24" :lg="8">
-        <el-card shadow="never" :loading="articleAnalyticsLoading">
+        <el-card shadow="never" :loading="articlestatsLoading">
           <div class="title">文章浏览量排行🚀</div>
           <ECharts :options="articleRankOptions" height="350px" />
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
-        <el-card shadow="never" :loading="articleAnalyticsLoading">
+        <el-card shadow="never" :loading="articlestatsLoading">
           <div class="title">文章分类统计🍉</div>
           <ECharts :options="categoryOptions" height="350px" />
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="24" :lg="8">
-        <el-card shadow="never" :loading="articleAnalyticsLoading">
+        <el-card shadow="never" :loading="articlestatsLoading">
           <div class="title">文章标签统计🌈</div>
-          <TagCloud v-if="!articleAnalyticsLoading" :tag-list="articleAnalyticsData.tag_list" />
+          <TagCloud v-if="!articlestatsLoading" :tag-list="articlestatsData.tag_list" />
         </el-card>
       </el-col>
     </el-row>
 
     <el-row class="data-card" style="margin-top: 32px">
       <div class="title">文章贡献统计🎉</div>
-      <Calender style="width: 100%" :values="articleAnalyticsData.article_statistics || []" />
+      <Calender style="width: 100%" :values="articlestatsData.article_statistics || []" />
     </el-row>
 
     <!-- 用户地域分布 -->
-    <el-card shadow="never" :loading="articleAnalyticsLoading">
+    <el-card shadow="never" :loading="articlestatsLoading">
       <div class="title">用户地域分布</div>
-      <div v-loading="articleAnalyticsLoading" style="height: 450px">
+      <div v-loading="articlestatsLoading" style="height: 450px">
         <div class="chart-wrapper">
           <el-radio-group v-model="userType" size="small">
             <el-radio :value="0">用户</el-radio>
@@ -382,12 +382,11 @@ import { useOnlineCount } from "@/hooks/websocket/services/useOnlineCount";
 import {
   ArticleViewVO,
   CategoryOverviewVO,
-  GetArticleAnalyticsResp,
+  GetArticleStatsResp,
   GetStatsDashboardResp,
   GetVisitTrendResp,
-  RegionStatVO,
 } from "@/api/types";
-import { StatsAPI } from "@/api";
+import { OverviewAPI } from "@/api";
 import ECharts from "@/components/ECharts/index.vue";
 import ChinaMap from "./components/ChinaMap.vue";
 import Calender from "./components/Calender.vue";
@@ -591,9 +590,9 @@ const transitionMessageCount = useTransition(
 );
 
 // 文章分析加载状态
-const articleAnalyticsLoading = ref(true);
+const articlestatsLoading = ref(true);
 // 文章分析数据
-const articleAnalyticsData = ref<GetArticleAnalyticsResp>({
+const articlestatsData = ref<GetArticleStatsResp>({
   category_list: [],
   tag_list: [],
   article_view_ranks: [],
@@ -609,7 +608,7 @@ const visitTrendChartOptions = ref();
  * 获取仪表盘统计数据
  */
 const fetchDashboard = () => {
-  StatsAPI.getStatsDashboard()
+  OverviewAPI.getDashboardStats()
     .then((res) => {
       dashboardData.value = res.data;
     })
@@ -627,7 +626,7 @@ const fetchVisitTrendData = () => {
     .toDate();
   const endDate = new Date();
 
-  StatsAPI.getVisitTrend({
+  OverviewAPI.getVisitTrend({
     start_date: dayjs(startDate).format("YYYY-MM-DD"),
     end_date: dayjs(endDate).format("YYYY-MM-DD"),
   }).then((res) => {
@@ -754,15 +753,15 @@ watch(
 /**
  * 获取文章分析数据
  */
-const fetchArticleAnalytics = () => {
-  StatsAPI.getArticleAnalytics()
+const fetchArticlestats = () => {
+  OverviewAPI.getArticleStats()
     .then((res) => {
-      articleAnalyticsData.value = res.data;
+      articlestatsData.value = res.data;
       updateArticleRankOptions(res.data.article_view_ranks);
       updateCategoryOptions(res.data.category_list);
     })
     .finally(() => {
-      articleAnalyticsLoading.value = false;
+      articlestatsLoading.value = false;
     });
 };
 
@@ -770,17 +769,20 @@ const fetchArticleAnalytics = () => {
  * 获取用户地理分布数据
  */
 const fetchUserGeoData = () => {
-  StatsAPI.getUserGeoStats({
-    user_type: userType.value,
-  }).then((res) => {
-    userAreaData.value = userType.value === 1 ? res.data.visitors : res.data.users;
+  OverviewAPI.getGeoStats().then((res) => {
+    // 契约已移除 user_type 过滤，两端分别返回；中国地图需要 {name, value} 形状
+    const list = userType.value === 1 ? res.data.visitors : res.data.users;
+    userAreaData.value = (list || []).map((item) => ({
+      name: item.region,
+      value: item.count,
+    }));
   });
 };
 
 // 组件挂载后加载数据
 onMounted(() => {
   fetchDashboard();
-  fetchArticleAnalytics();
+  fetchArticlestats();
   fetchGitHubReleases();
 });
 
@@ -860,7 +862,7 @@ const updateCategoryOptions = (categories: CategoryOverviewVO[]) => {
 const userType = ref(1);
 
 // 用户地域分布数据
-const userAreaData = ref<RegionStatVO[]>([]);
+const userAreaData = ref<Array<{ name: string; value: number }>>([]);
 
 // 监听用户类型的变化，重新获取用户地区分布数据
 watch(

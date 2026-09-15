@@ -2,37 +2,37 @@ import request from "@/utils/request";
 import type {
   BatchResp,
   DeleteMessageReq,
-  PageResult,
+  ListResult,
+  PatchMessagesReq,
   QueryMessageListReq,
-  UpdateMessageStatusReq,
 } from "@/api/types";
 
 /** 留言管理 */
 export const MessageAPI = {
-  /** 批量删除留言 */
-  deleteMessage(data?: DeleteMessageReq): Promise<ApiResponse<BatchResp>> {
-    return request({
-      url: `/admin-api/v1/message/delete_message`,
-      method: "DELETE",
-      data,
-    });
-  },
-
   /** 获取留言列表 */
-  queryMessageList(data?: QueryMessageListReq): Promise<ApiResponse<PageResult>> {
+  queryMessageList(params?: QueryMessageListReq): Promise<ApiResponse<ListResult>> {
     return request({
-      url: `/admin-api/v1/message/query_message_list`,
-      method: "POST",
-      data,
+      url: `/admin-api/v1/messages`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 批量更新留言状态 */
-  updateMessageStatus(data?: UpdateMessageStatusReq): Promise<ApiResponse<BatchResp>> {
+  /** 部分更新留言（批量） */
+  patchMessages(data?: PatchMessagesReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/message/update_message_status`,
-      method: "PUT",
-      data,
+      url: `/admin-api/v1/messages`,
+      method: "PATCH",
+      data: data,
+    });
+  },
+
+  /** 批量删除留言 */
+  batchDeleteMessage(data?: DeleteMessageReq): Promise<ApiResponse<BatchResp>> {
+    return request({
+      url: `/admin-api/v1/messages/batch-delete`,
+      method: "POST",
+      data: data,
     });
   },
 };

@@ -26,7 +26,7 @@ const contentConfig: IContentConfig<QueryNotifyMessageListReq> = {
     return NotifyMessageAPI.queryNotifyMessageList(query);
   },
   deleteAction(ids: string) {
-    return NotifyMessageAPI.deleteNotifyMessage({
+    return NotifyMessageAPI.batchDeleteNotifyMessage({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

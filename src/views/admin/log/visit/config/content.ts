@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryVisitLogListReq> = {
     return VisitLogAPI.queryVisitLogList(query);
   },
   deleteAction(ids: string) {
-    return VisitLogAPI.deleteVisitLog({
+    return VisitLogAPI.batchDeleteVisitLog({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

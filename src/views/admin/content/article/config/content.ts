@@ -26,7 +26,7 @@ const contentConfig: IContentConfig<QueryArticleListReq> = {
     return ArticleAPI.queryArticleList(query);
   },
   modifyAction(data) {
-    return ArticleAPI.updateArticleTop(data);
+    return ArticleAPI.patchArticle(data);
   },
   pk: "id",
   toolbar: [

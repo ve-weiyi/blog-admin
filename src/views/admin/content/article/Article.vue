@@ -93,7 +93,7 @@ function handleOperateClick(data: IOperateData) {
       router.push({ path: `/article/edit/${data.row.id}` });
       break;
     case "delete":
-      ArticleAPI.updateArticleDelete({
+      ArticleAPI.patchArticle({
         id: data.row.id,
         is_delete: ArticleDeleteEnum.YES,
       }).then(() => {
@@ -102,7 +102,7 @@ function handleOperateClick(data: IOperateData) {
       });
       break;
     case "restore":
-      ArticleAPI.updateArticleDelete({
+      ArticleAPI.patchArticle({
         id: data.row.id,
         is_delete: ArticleDeleteEnum.NO,
       }).then(() => {

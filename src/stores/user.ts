@@ -69,7 +69,7 @@ export const useUserStore = defineStore("user", () => {
    */
   function getUserInfo() {
     return new Promise<UserProfile>((resolve, reject) => {
-      MeAPI.getUserProfile()
+      MeAPI.getMe()
         .then((res) => {
           if (!res) {
             reject("Verification failed, please Login again.");

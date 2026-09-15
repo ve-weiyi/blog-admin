@@ -3,69 +3,67 @@ import type {
   BatchMarkRecordsReadReq,
   BatchResp,
   DeleteNotifyRecordReq,
+  ListResult,
   MarkAllRecordsReadReq,
   MarkRecordReadReq,
-  PageResult,
   QueryNotifyRecordListReq,
   QueryUserInboxRecordListReq,
   QueryUserInboxRecordListResp,
 } from "@/api/types";
 
-/** 通知管理 */
+/** 投递记录管理 */
 export const NotifyRecordAPI = {
-  /** 批量标记投递记录为已读 */
-  batchMarkRecordsRead(data?: BatchMarkRecordsReadReq): Promise<ApiResponse<BatchResp>> {
+  /** 查询用户 inbox 投递列表 */
+  queryUserInboxRecordList(params?: QueryUserInboxRecordListReq): Promise<ApiResponse<QueryUserInboxRecordListResp>> {
     return request({
-      url: `/admin-api/v1/notify_record/batch_mark_records_read`,
-      method: "POST",
-      data,
+      url: `/admin-api/v1/inbox-records`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 批量删除投递记录 */
-  deleteNotifyRecord(data?: DeleteNotifyRecordReq): Promise<ApiResponse<BatchResp>> {
+  /** 标记单条投递记录为已读 */
+  markRecordRead(params: MarkRecordReadReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/notify_record/delete_notify_record`,
-      method: "DELETE",
-      data,
+      url: `/admin-api/v1/inbox-records/${params.id}/mark-read`,
+      method: "POST",
+      params: params,
+    });
+  },
+
+  /** 批量标记投递记录为已读 */
+  batchMarkRecordsRead(data?: BatchMarkRecordsReadReq): Promise<ApiResponse<BatchResp>> {
+    return request({
+      url: `/admin-api/v1/inbox-records/batch-mark-read`,
+      method: "POST",
+      data: data,
     });
   },
 
   /** 全部标记投递记录为已读 */
   markAllRecordsRead(data?: MarkAllRecordsReadReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/notify_record/mark_all_records_read`,
+      url: `/admin-api/v1/inbox-records/mark-all-read`,
       method: "POST",
-      data,
-    });
-  },
-
-  /** 标记单条投递记录为已读 */
-  markRecordRead(data?: MarkRecordReadReq): Promise<ApiResponse<BatchResp>> {
-    return request({
-      url: `/admin-api/v1/notify_record/mark_record_read`,
-      method: "POST",
-      data,
+      data: data,
     });
   },
 
   /** 获取统一投递记录列表 */
-  queryNotifyRecordList(data?: QueryNotifyRecordListReq): Promise<ApiResponse<PageResult>> {
+  queryNotifyRecordList(params?: QueryNotifyRecordListReq): Promise<ApiResponse<ListResult>> {
     return request({
-      url: `/admin-api/v1/notify_record/query_notify_record_list`,
-      method: "POST",
-      data,
+      url: `/admin-api/v1/notify-records`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 查询用户 inbox 投递列表 */
-  queryUserInboxRecordList(
-    data?: QueryUserInboxRecordListReq
-  ): Promise<ApiResponse<QueryUserInboxRecordListResp>> {
+  /** 批量删除投递记录 */
+  batchDeleteNotifyRecord(data?: DeleteNotifyRecordReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/notify_record/query_user_inbox_record_list`,
+      url: `/admin-api/v1/notify-records/batch-delete`,
       method: "POST",
-      data,
+      data: data,
     });
   },
 };

@@ -3,6 +3,7 @@ import { defineMock } from "./base";
 const baseTime = 1700000000000;
 
 /** 站内信列表 */
+
 const mockInbox = [
   {
     id: 1,
@@ -55,6 +56,7 @@ const mockInbox = [
 ];
 
 /** 通知内容 */
+
 const mockMessages = [
   {
     id: 1,
@@ -65,8 +67,6 @@ const mockMessages = [
     target_type: "all",
     target_ids: "",
     status: "published",
-    published_at: baseTime,
-    published_by: "admin",
     created_at: baseTime,
     updated_at: baseTime,
   },
@@ -79,14 +79,13 @@ const mockMessages = [
     target_type: "all",
     target_ids: "",
     status: "draft",
-    published_at: 0,
-    published_by: "",
     created_at: baseTime,
     updated_at: baseTime,
   },
 ];
 
 /** 通知模板 */
+
 const mockTemplates = [
   {
     id: 1,
@@ -114,8 +113,43 @@ const mockTemplates = [
 
 export default defineMock([
   {
-    url: "notify_record/query_user_inbox_record_list",
+    url: "notify-messages",
+    method: ["GET"],
+    body: { code: 200, data: { list: mockMessages, total: mockMessages.length }, msg: "ok" },
+  },
+  {
+    url: "notify-messages/:id",
+    method: ["GET"],
+    body: { code: 200, data: mockMessages[0], msg: "ok" },
+  },
+  {
+    url: "notify-messages",
     method: ["POST"],
+    body: { code: 200, data: mockMessages[0], msg: "ok" },
+  },
+  {
+    url: "notify-messages/:id",
+    method: ["PUT"],
+    body: { code: 200, data: mockMessages[0], msg: "ok" },
+  },
+  {
+    url: "notify-messages/batch-delete",
+    method: ["POST"],
+    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
+  },
+  {
+    url: "notify-messages/:id/publish",
+    method: ["POST"],
+    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
+  },
+  {
+    url: "notify-messages/:id/revoke",
+    method: ["POST"],
+    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
+  },
+  {
+    url: "inbox-records",
+    method: ["GET"],
     body: {
       code: 200,
       data: {
@@ -128,98 +162,54 @@ export default defineMock([
       msg: "ok",
     },
   },
-
   {
-    url: "notify_record/mark_record_read",
+    url: "inbox-records/:id/mark-read",
     method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
-
   {
-    url: "notify_record/batch_mark_records_read",
+    url: "inbox-records/batch-mark-read",
     method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
-
   {
-    url: "notify_record/mark_all_records_read",
+    url: "inbox-records/mark-all-read",
     method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
-
   {
-    url: "notify_record/query_notify_record_list",
-    method: ["POST"],
+    url: "notify-records",
+    method: ["GET"],
     body: { code: 200, data: { list: mockInbox, total: mockInbox.length }, msg: "ok" },
   },
-
   {
-    url: "notify_record/delete_notify_record",
-    method: ["DELETE"],
+    url: "notify-records/batch-delete",
+    method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
-
-  // ==================== 通知内容 ====================
   {
-    url: "notify_message/query_notify_message_list",
-    method: ["POST"],
-    body: { code: 200, data: { list: mockMessages, total: mockMessages.length }, msg: "ok" },
-  },
-  {
-    url: "notify_message/get_notify_message",
+    url: "notify-templates",
     method: ["GET"],
-    body: { code: 200, data: mockMessages[0], msg: "ok" },
-  },
-  {
-    url: "notify_message/create_notify_message",
-    method: ["POST"],
-    body: { code: 200, data: mockMessages[0], msg: "ok" },
-  },
-  {
-    url: "notify_message/update_notify_message",
-    method: ["PUT"],
-    body: { code: 200, data: mockMessages[0], msg: "ok" },
-  },
-  {
-    url: "notify_message/delete_notify_message",
-    method: ["DELETE"],
-    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
-  },
-  {
-    url: "notify_message/publish_notify_message",
-    method: ["POST"],
-    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
-  },
-  {
-    url: "notify_message/revoke_notify_message",
-    method: ["POST"],
-    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
-  },
-
-  // ==================== 通知模板 ====================
-  {
-    url: "notify_template/query_notify_template_list",
-    method: ["POST"],
     body: { code: 200, data: { list: mockTemplates, total: mockTemplates.length }, msg: "ok" },
   },
   {
-    url: "notify_template/get_notify_template",
+    url: "notify-templates/:id",
     method: ["GET"],
     body: { code: 200, data: mockTemplates[0], msg: "ok" },
   },
   {
-    url: "notify_template/create_notify_template",
+    url: "notify-templates",
     method: ["POST"],
     body: { code: 200, data: mockTemplates[0], msg: "ok" },
   },
   {
-    url: "notify_template/update_notify_template",
+    url: "notify-templates/:id",
     method: ["PUT"],
     body: { code: 200, data: mockTemplates[0], msg: "ok" },
   },
   {
-    url: "notify_template/delete_notify_template",
-    method: ["DELETE"],
+    url: "notify-templates/batch-delete",
+    method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
 ]);

@@ -162,7 +162,6 @@ const initFormData: UpdateAlbumReq = {
   album_desc: "",
   album_cover: "",
   status: ArticleStatusEnum.PUBLIC,
-  is_delete: SwitchEnum.OFF,
 };
 
 const formData = ref<UpdateAlbumReq>({ ...initFormData });
@@ -232,9 +231,8 @@ const handleDelete = async (data: AlbumVO) => {
       type: "warning",
     });
 
-    await AlbumAPI.updateAlbumDelete({
+    await AlbumAPI.batchDeleteAlbum({
       ids: [data.id!],
-      is_delete: SwitchEnum.ON,
     });
 
     ElMessage.success("删除成功");

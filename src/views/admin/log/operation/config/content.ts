@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryOperationLogListReq> = {
     return OperationLogAPI.queryOperationLogList(query);
   },
   deleteAction(ids: string) {
-    return OperationLogAPI.deleteOperationLog({
+    return OperationLogAPI.batchDeleteOperationLog({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

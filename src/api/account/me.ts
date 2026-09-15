@@ -1,130 +1,130 @@
 import request from "@/utils/request";
 import type {
-  BindUserEmailReq,
-  BindUserPhoneReq,
-  BindUserThirdPartyReq,
+  BindMeEmailReq,
+  BindMeMobileReq,
+  BindMeThirdPartyReq,
   EmptyReq,
   EmptyResp,
-  GetUserApisResp,
-  GetUserMenusResp,
-  GetUserProfileReq,
-  GetUserRolesResp,
-  PageResult,
-  QueryUserLoginHistoryReq,
-  UnbindUserThirdPartyReq,
-  UpdateUserAvatarReq,
-  UpdateUserPasswordReq,
-  UpdateUserProfileReq,
+  GetMeApisResp,
+  GetMeMenusResp,
+  GetMeReq,
+  GetMeRolesResp,
+  ListResult,
+  QueryMeLoginLogListReq,
+  UnbindMeThirdPartyReq,
+  UpdateMeAvatarReq,
+  UpdateMePasswordReq,
+  UpdateMeReq,
   UserProfile,
 } from "@/api/types";
 
 /** 个人中心 */
 export const MeAPI = {
-  /** 绑定邮箱 */
-  bindUserEmail(data?: BindUserEmailReq): Promise<ApiResponse<EmptyResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/bind_user_email`,
-      method: "POST",
-      data,
-    });
-  },
-
-  /** 绑定手机号 */
-  bindUserPhone(data?: BindUserPhoneReq): Promise<ApiResponse<EmptyResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/bind_user_phone`,
-      method: "POST",
-      data,
-    });
-  },
-
-  /** 绑定第三方平台账号 */
-  bindUserThirdParty(data?: BindUserThirdPartyReq): Promise<ApiResponse<EmptyResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/bind_user_third_party`,
-      method: "POST",
-      data,
-    });
-  },
-
   /** 获取用户接口权限 */
-  getUserApis(params?: EmptyReq): Promise<ApiResponse<GetUserApisResp>> {
+  getMeApis(params?: EmptyReq): Promise<ApiResponse<GetMeApisResp>> {
     return request({
-      url: `/admin-api/v1/user/me/get_user_apis`,
+      url: `/admin-api/v1/me/apis`,
       method: "GET",
-      params,
-    });
-  },
-
-  /** 获取用户菜单权限 */
-  getUserMenus(params?: EmptyReq): Promise<ApiResponse<GetUserMenusResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/get_user_menus`,
-      method: "GET",
-      params,
-    });
-  },
-
-  /** 获取当前用户信息 */
-  getUserProfile(params?: GetUserProfileReq): Promise<ApiResponse<UserProfile>> {
-    return request({
-      url: `/admin-api/v1/user/me/get_user_profile`,
-      method: "GET",
-      params,
-    });
-  },
-
-  /** 获取用户角色 */
-  getUserRoles(params?: EmptyReq): Promise<ApiResponse<GetUserRolesResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/get_user_roles`,
-      method: "GET",
-      params,
-    });
-  },
-
-  /** 查询用户登录历史 */
-  queryUserLoginHistory(data?: QueryUserLoginHistoryReq): Promise<ApiResponse<PageResult>> {
-    return request({
-      url: `/admin-api/v1/user/me/query_user_login_history`,
-      method: "POST",
-      data,
-    });
-  },
-
-  /** 解绑第三方平台账号 */
-  unbindUserThirdParty(data?: UnbindUserThirdPartyReq): Promise<ApiResponse<EmptyResp>> {
-    return request({
-      url: `/admin-api/v1/user/me/unbind_user_third_party`,
-      method: "POST",
-      data,
+      params: params,
     });
   },
 
   /** 修改用户头像 */
-  updateUserAvatar(data?: UpdateUserAvatarReq): Promise<ApiResponse<EmptyResp>> {
+  updateMeAvatar(data?: UpdateMeAvatarReq): Promise<ApiResponse<EmptyResp>> {
     return request({
-      url: `/admin-api/v1/user/me/update_user_avatar`,
+      url: `/admin-api/v1/me/avatar`,
       method: "PUT",
-      data,
+      data: data,
+    });
+  },
+
+  /** 绑定邮箱 */
+  bindMeEmail(data?: BindMeEmailReq): Promise<ApiResponse<EmptyResp>> {
+    return request({
+      url: `/admin-api/v1/me/bind-email`,
+      method: "POST",
+      data: data,
+    });
+  },
+
+  /** 绑定手机号 */
+  bindMeMobile(data?: BindMeMobileReq): Promise<ApiResponse<EmptyResp>> {
+    return request({
+      url: `/admin-api/v1/me/bind-mobile`,
+      method: "POST",
+      data: data,
+    });
+  },
+
+  /** 绑定第三方平台账号 */
+  bindMeThirdParty(data?: BindMeThirdPartyReq): Promise<ApiResponse<EmptyResp>> {
+    return request({
+      url: `/admin-api/v1/me/bind-third-party`,
+      method: "POST",
+      data: data,
+    });
+  },
+
+  /** 查询用户登录历史 */
+  queryMeLoginLogList(params?: QueryMeLoginLogListReq): Promise<ApiResponse<ListResult>> {
+    return request({
+      url: `/admin-api/v1/me/login-logs`,
+      method: "GET",
+      params: params,
+    });
+  },
+
+  /** 获取用户菜单权限 */
+  getMeMenus(params?: EmptyReq): Promise<ApiResponse<GetMeMenusResp>> {
+    return request({
+      url: `/admin-api/v1/me/menus`,
+      method: "GET",
+      params: params,
     });
   },
 
   /** 修改用户密码 */
-  updateUserPassword(data?: UpdateUserPasswordReq): Promise<ApiResponse<EmptyResp>> {
+  updateMePassword(data?: UpdateMePasswordReq): Promise<ApiResponse<EmptyResp>> {
     return request({
-      url: `/admin-api/v1/user/me/update_user_password`,
+      url: `/admin-api/v1/me/password`,
       method: "PUT",
-      data,
+      data: data,
+    });
+  },
+
+  /** 获取当前用户信息 */
+  getMe(params?: GetMeReq): Promise<ApiResponse<UserProfile>> {
+    return request({
+      url: `/admin-api/v1/me/profile`,
+      method: "GET",
+      params: params,
     });
   },
 
   /** 更新当前用户信息 */
-  updateUserProfile(data?: UpdateUserProfileReq): Promise<ApiResponse<EmptyResp>> {
+  updateMe(data?: UpdateMeReq): Promise<ApiResponse<EmptyResp>> {
     return request({
-      url: `/admin-api/v1/user/me/update_user_profile`,
+      url: `/admin-api/v1/me/profile`,
       method: "PUT",
-      data,
+      data: data,
+    });
+  },
+
+  /** 获取用户角色 */
+  getMeRoles(params?: EmptyReq): Promise<ApiResponse<GetMeRolesResp>> {
+    return request({
+      url: `/admin-api/v1/me/roles`,
+      method: "GET",
+      params: params,
+    });
+  },
+
+  /** 解绑第三方平台账号 */
+  unbindMeThirdParty(data?: UnbindMeThirdPartyReq): Promise<ApiResponse<EmptyResp>> {
+    return request({
+      url: `/admin-api/v1/me/unbind-third-party`,
+      method: "POST",
+      data: data,
     });
   },
 };

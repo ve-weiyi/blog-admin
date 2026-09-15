@@ -29,7 +29,7 @@ const contentConfig: IContentConfig<QueryTagListReq> = {
     return TagAPI.queryTagList(params);
   },
   deleteAction(ids: string) {
-    return TagAPI.deleteTag({
+    return TagAPI.batchDeleteTag({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

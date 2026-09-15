@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryLoginLogListReq> = {
     return LoginLogAPI.queryLoginLogList(query);
   },
   deleteAction(ids: string) {
-    return LoginLogAPI.deleteLoginLog({
+    return LoginLogAPI.batchDeleteLoginLog({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

@@ -1,10 +1,14 @@
 import { defineMock } from "./base";
 
-/** 演示头像，用于开发态展示非兜底路径 */
 const MOCK_AVATAR =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23409eff'/%3E%3Ctext x='20' y='27' font-size='20' font-family='sans-serif' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E";
 
-/** 模拟用户信息 */
+const baseTime = 1700000000000;
+
+const ok = (data: unknown) => ({ code: 200, data, msg: "ok" });
+
+const batch = (n = 1) => ok({ success_count: n });
+
 const mockUserInfo = {
   user_id: "00000000-0000-0000-0000-000000000001",
   username: "admin",
@@ -13,7 +17,8 @@ const mockUserInfo = {
   user_type: "admin",
 };
 
-/** 模拟游客信息 */
+/** 友链 */
+
 const mockGuestInfo = {
   device_id: "mock-device-id",
   os: "macOS",
@@ -22,9 +27,6 @@ const mockGuestInfo = {
   ip_source: "本机",
 };
 
-const baseTime = 1700000000000;
-
-/** 模拟评论列表 */
 const mockComments = [
   {
     id: 1,
@@ -71,6 +73,7 @@ const mockComments = [
 ];
 
 /** 模拟留言列表 */
+
 const mockMessages = [
   {
     id: 1,
@@ -96,48 +99,80 @@ const mockMessages = [
   },
 ];
 
+const mockTalks = [
+  {
+    id: 1,
+    user_id: mockUserInfo.user_id,
+    content: "今天天气不错",
+    img_list: [],
+    is_top: 0,
+    status: 1,
+    like_count: 3,
+    comment_count: 1,
+    created_at: baseTime,
+    updated_at: baseTime,
+    user_info: mockUserInfo,
+  },
+  {
+    id: 2,
+    user_id: mockUserInfo.user_id,
+    content: "记录一下",
+    img_list: [],
+    is_top: 1,
+    status: 1,
+    like_count: 0,
+    comment_count: 0,
+    created_at: baseTime,
+    updated_at: baseTime,
+    user_info: mockUserInfo,
+  },
+];
+
 export default defineMock([
   {
-    url: "comment/query_comment_list",
-    method: ["POST"],
+    url: "comments",
+    method: ["GET"],
     body: {
       code: 200,
       data: { list: mockComments, total: mockComments.length },
       msg: "ok",
     },
   },
-
   {
-    url: "comment/delete_comment",
-    method: ["DELETE"],
-    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
-  },
-
-  {
-    url: "comment/update_comment_status",
-    method: ["PUT"],
-    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
-  },
-
-  {
-    url: "message/query_message_list",
+    url: "comments/batch-delete",
     method: ["POST"],
+    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
+  },
+  {
+    url: "comments",
+    method: ["PATCH"],
+    body: { code: 200, data: { success_count: 1 }, msg: "ok" },
+  },
+  {
+    url: "messages",
+    method: ["GET"],
     body: {
       code: 200,
       data: { list: mockMessages, total: mockMessages.length },
       msg: "ok",
     },
   },
-
   {
-    url: "message/delete_message",
-    method: ["DELETE"],
+    url: "messages/batch-delete",
+    method: ["POST"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
-
   {
-    url: "message/update_message_status",
-    method: ["PUT"],
+    url: "messages",
+    method: ["PATCH"],
     body: { code: 200, data: { success_count: 1 }, msg: "ok" },
   },
+  {
+    url: "talks",
+    method: ["GET"],
+    body: ok({ list: mockTalks, total: mockTalks.length }),
+  },
+  { url: "talks", method: ["POST"], body: ok(mockTalks[0]) },
+  { url: "talks/:id", method: ["PUT"], body: ok(mockTalks[0]) },
+  { url: "talks/batch-delete", method: ["POST"], body: batch() },
 ]);
