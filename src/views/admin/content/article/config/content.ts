@@ -102,7 +102,7 @@ const contentConfig: IContentConfig<QueryArticleListReq> = {
     },
     {
       label: "浏览量",
-      prop: "views_count",
+      prop: "view_count",
       width: 80,
       align: "center",
     },
