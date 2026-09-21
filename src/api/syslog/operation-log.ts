@@ -2,27 +2,27 @@ import request from "@/utils/request";
 import type {
   BatchResp,
   DeleteOperationLogReq,
-  PageResult,
+  ListResult,
   QueryOperationLogListReq,
 } from "@/api/types";
 
 /** 操作日志 */
 export const OperationLogAPI = {
-  /** 批量删除操作日志 */
-  deleteOperationLog(data?: DeleteOperationLogReq): Promise<ApiResponse<BatchResp>> {
+  /** 获取操作日志列表 */
+  queryOperationLogList(params?: QueryOperationLogListReq): Promise<ApiResponse<ListResult>> {
     return request({
-      url: `/admin-api/v1/operation_log/delete_operation_log`,
-      method: "DELETE",
-      data,
+      url: `/admin-api/v1/operation-logs`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 获取操作日志列表 */
-  queryOperationLogList(data?: QueryOperationLogListReq): Promise<ApiResponse<PageResult>> {
+  /** 批量删除操作日志 */
+  batchDeleteOperationLog(data?: DeleteOperationLogReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/operation_log/query_operation_log_list`,
+      url: `/admin-api/v1/operation-logs/batch-delete`,
       method: "POST",
-      data,
+      data: data,
     });
   },
 };

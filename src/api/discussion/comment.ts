@@ -2,37 +2,37 @@ import request from "@/utils/request";
 import type {
   BatchResp,
   DeleteCommentReq,
-  PageResult,
+  ListResult,
+  PatchCommentsReq,
   QueryCommentListReq,
-  UpdateCommentStatusReq,
 } from "@/api/types";
 
 /** 评论管理 */
 export const CommentAPI = {
-  /** 批量删除评论 */
-  deleteComment(data?: DeleteCommentReq): Promise<ApiResponse<BatchResp>> {
-    return request({
-      url: `/admin-api/v1/comment/delete_comment`,
-      method: "DELETE",
-      data,
-    });
-  },
-
   /** 获取评论列表(后台) */
-  queryCommentList(data?: QueryCommentListReq): Promise<ApiResponse<PageResult>> {
+  queryCommentList(params?: QueryCommentListReq): Promise<ApiResponse<ListResult>> {
     return request({
-      url: `/admin-api/v1/comment/query_comment_list`,
-      method: "POST",
-      data,
+      url: `/admin-api/v1/comments`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 批量更新评论状态 */
-  updateCommentStatus(data?: UpdateCommentStatusReq): Promise<ApiResponse<BatchResp>> {
+  /** 部分更新评论（批量） */
+  patchComments(data?: PatchCommentsReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/comment/update_comment_status`,
-      method: "PUT",
-      data,
+      url: `/admin-api/v1/comments`,
+      method: "PATCH",
+      data: data,
+    });
+  },
+
+  /** 批量删除评论 */
+  batchDeleteComment(data?: DeleteCommentReq): Promise<ApiResponse<BatchResp>> {
+    return request({
+      url: `/admin-api/v1/comments/batch-delete`,
+      method: "POST",
+      data: data,
     });
   },
 };

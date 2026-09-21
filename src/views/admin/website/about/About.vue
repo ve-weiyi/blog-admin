@@ -55,7 +55,7 @@ const updateAbout = () => {
   ConfigAPI.updateAboutMe(data).then((res) => {
     ElNotification.success({
       title: "成功",
-      message: res.msg,
+      message: res.message,
     });
   });
 };

@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "vite --mode test",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "build:preview": "vite build --mode preview",
+    "preview": "vite preview --mode preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint:eslint": "eslint --cache \"src/**/*.{vue,ts,js}\" --fix",

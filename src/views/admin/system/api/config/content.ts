@@ -31,7 +31,7 @@ const contentConfig: IContentConfig<QueryApiListReq> = {
     return ApiAPI.queryApiList(params);
   },
   deleteAction(ids: string) {
-    return ApiAPI.deleteApi({
+    return ApiAPI.batchDeleteApi({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

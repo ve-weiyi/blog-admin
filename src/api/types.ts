@@ -44,10 +44,10 @@ export interface ArticleVO {
   status: number;
   created_at: number;
   updated_at: number;
-  category_name: string | null;
+  category_name: string;
   tag_name_list: string[];
   like_count: number;
-  views_count: number;
+  view_count: number;
 }
 
 export interface ArticleViewVO {
@@ -64,17 +64,17 @@ export interface BatchResp {
   success_count: number;
 }
 
-export interface BindUserEmailReq {
+export interface BindMeEmailReq {
   email: string; // 邮箱
   verify_code: string; // 验证码
 }
 
-export interface BindUserPhoneReq {
+export interface BindMeMobileReq {
   mobile: string; // 手机号
   verify_code: string; // 验证码
 }
 
-export interface BindUserThirdPartyReq {
+export interface BindMeThirdPartyReq {
   platform: string; // 平台
   code: string; // 授权码
   state?: string; // 状态
@@ -98,7 +98,8 @@ export interface CleanApiResp {
   success_count: number; // 清空成功数量
 }
 
-export interface CleanMenuReq {}
+export interface CleanMenuReq {
+}
 
 export interface CleanMenuResp {
   success_count: number; // 清空成功数量
@@ -143,7 +144,7 @@ export interface CreateArticleReq {
   original_url: string;
   is_top: number;
   status: number;
-  category_name?: string | null;
+  category_name?: string;
   tag_name_list?: string[];
 }
 
@@ -219,6 +220,25 @@ export interface CreateTalkReq {
   img_list: string[];
   is_top: number;
   status: number;
+}
+
+// 获取上传凭证请求
+export interface CreateUploadTokenReq {
+  file_name: string; // 文件名称
+  file_base?: string; // 文件目录
+  expire_seconds?: number; // 凭证有效期（秒），默认1小时
+}
+
+// 获取上传凭证响应（完整的UploadToken结构）
+export interface CreateUploadTokenResp {
+  upload_url: string; // 上传地址
+  token: string; // 上传凭证/Token
+  policy: string; // 上传策略
+  signature: string; // 签名
+  file_key: string; // 文件Key/路径
+  access_url: string; // 上传成功后的访问URL
+  expire_at: number; // 凭证过期时间戳（秒）
+  extra_data: Record<string, any>; // 额外数据
 }
 
 export interface DashboardStats {
@@ -313,26 +333,25 @@ export interface DeleteVisitLogReq {
   ids: number[];
 }
 
+export interface DestroyAlbumReq {
+  ids: number[];
+}
+
+export interface DestroyPhotoReq {
+  ids: number[];
+}
+
 // 邮箱验证码登录（仅登录，未注册报错）
 export interface EmailLoginReq {
   email: string; // 邮箱
   code: string; // 验证码
 }
 
-// 邮箱注册（必须设密码）
-export interface EmailRegisterReq {
-  email: string; // 邮箱
-  password: string; // 密码
-  code: string; // 验证码
-  username?: string; // 用户名
-  nickname?: string; // 昵称
+export interface EmptyReq {
 }
 
-export interface EmailRegisterResp {}
-
-export interface EmptyReq {}
-
-export interface EmptyResp {}
+export interface EmptyResp {
+}
 
 export interface ExportArticleReq {
   ids: number[];
@@ -365,15 +384,15 @@ export interface GetApiReq {
   id: number; // 主键id
 }
 
-export interface GetArticleAnalyticsResp {
+export interface GetArticleReq {
+  id: number;
+}
+
+export interface GetArticleStatsResp {
   category_list: CategoryOverviewVO[];
   tag_list: TagOverviewVO[];
   article_view_ranks: ArticleViewVO[];
   article_statistics: ArticleStatisticsVO[];
-}
-
-export interface GetArticleReq {
-  id: number;
 }
 
 export interface GetCaptchaReq {
@@ -384,10 +403,20 @@ export interface GetCaptchaReq {
 export interface GetCaptchaResp {
   captcha_key: string; // 验证码key
   captcha_base64: string; // 验证码base64
-  captcha_code: string; // 验证码
 }
 
-export interface GetGuestReq {}
+export interface GetGeoStatsReq {
+  start_date: string;
+  end_date?: string;
+}
+
+export interface GetGeoStatsResp {
+  users: RegionStatVO[];
+  visitors: RegionStatVO[];
+}
+
+export interface GetGuestReq {
+}
 
 export interface GetGuestResp {
   id: number; // 访客唯一ID
@@ -396,6 +425,21 @@ export interface GetGuestResp {
   browser: string; // 浏览器
   ip_address: string; // IP地址
   ip_source: string; // IP归属地
+}
+
+export interface GetMeApisResp {
+  list: UserApi[];
+}
+
+export interface GetMeMenusResp {
+  list: UserMenu[];
+}
+
+export interface GetMeReq {
+}
+
+export interface GetMeRolesResp {
+  list: UserRole[];
 }
 
 export interface GetMenuReq {
@@ -427,7 +471,7 @@ export interface GetRolePermissionsReq {
 
 // 获取角色详情请求
 export interface GetRoleReq {
-  ids: number[]; // 角色ID列表
+  id: number; // 角色ID
 }
 
 export interface GetStatsDashboardResp {
@@ -444,29 +488,6 @@ export interface GetTalkReq {
   id: number;
 }
 
-// 获取上传凭证请求
-export interface GetUploadTokenReq {
-  file_name: string; // 文件名称
-  file_base?: string; // 文件目录
-  expire_seconds?: number; // 凭证有效期（秒），默认1小时
-}
-
-// 获取上传凭证响应（完整的UploadToken结构）
-export interface GetUploadTokenResp {
-  upload_url: string; // 上传地址
-  token: string; // 上传凭证/Token
-  policy: string; // 上传策略
-  signature: string; // 签名
-  file_key: string; // 文件Key/路径
-  access_url: string; // 上传成功后的访问URL
-  expire_at: number; // 凭证过期时间戳（秒）
-  extra_data: Record<string, any>; // 额外数据
-}
-
-export interface GetUserApisResp {
-  list: UserApi[];
-}
-
 // 获取用户详情请求
 export interface GetUserDetailReq {
   user_id: string; // 用户ID (UUID)
@@ -475,25 +496,6 @@ export interface GetUserDetailReq {
 // 用户详情响应
 export interface GetUserDetailResp extends UserVO {
   last_login: UserLastLogin;
-}
-
-export interface GetUserGeoStatsReq {
-  user_type?: number;
-}
-
-export interface GetUserGeoStatsResp {
-  users: RegionStatVO[];
-  visitors: RegionStatVO[];
-}
-
-export interface GetUserMenusResp {
-  list: UserMenu[];
-}
-
-export interface GetUserProfileReq {}
-
-export interface GetUserRolesResp {
-  list: UserRole[];
 }
 
 export interface GetVisitTrendReq {
@@ -532,12 +534,27 @@ export interface IdsReq {
   ids: number[];
 }
 
+export interface ListQuery {
+  page?: number; // 当前页码
+  page_size?: number; // 每页数量
+  sorts?: string[]; // 排序
+}
+
+export interface ListResult {
+  page: number;
+  page_size: number;
+  total: number;
+  list: any;
+}
+
 export interface LoginLogVO {
   id?: number;
   user_id: string; // 用户id
   device_id: string; // 终端id
   login_type: string; // 登录类型
-  login_at: number; // 登录时间
+  status: number; // 登录状态：0-失败 1-成功
+  fail_reason: string; // 失败原因
+  login_at: number; // 登录时间（对应 proto 的 created_at）
   logout_at: number; // 登出时间
   user_info: UserInfoVO; // 用户信息
   guest_info: GuestInfoVO; // 游客信息
@@ -551,9 +568,11 @@ export interface LoginResp {
   token: Token;
 }
 
-export interface LogoutReq {}
+export interface LogoutReq {
+}
 
-export interface LogoutResp {}
+export interface LogoutResp {
+}
 
 export interface MarkAllRecordsReadReq {
   user_id: string;
@@ -564,7 +583,7 @@ export interface MarkRecordReadReq {
 }
 
 export interface MenuMeta {
-  type: string; // 菜单类型（0代表目录、1代表菜单、2代表按钮、3代表外链）
+  type: string; // 菜单类型（CATALOG目录、MENU菜单、BUTTON按钮）
   title?: string; // 菜单标题
   icon?: string; // 菜单图标
   rank?: number; // 排序
@@ -588,7 +607,7 @@ export interface MenuVO extends MenuMeta {
   name: string; // 路由名字
   component: string; // Layout组件
   redirect?: string; // 路由重定向
-  type: string; // 菜单类型（0代表目录、1代表菜单、2代表按钮、3代表外链）
+  type: string; // 菜单类型（CATALOG目录、MENU菜单、BUTTON按钮）
   title?: string; // 菜单标题
   icon?: string; // 菜单图标
   rank?: number; // 排序
@@ -652,8 +671,6 @@ export interface NotifyRecordVO {
   title: string;
   category: string;
   level: string;
-  published_at: number;
-  published_by: string;
 }
 
 export interface NotifyTemplateVO {
@@ -703,19 +720,6 @@ export interface OperationLogVO {
   guest_info: GuestInfoVO;
 }
 
-export interface PageQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-}
-
-export interface PageResult {
-  page: number;
-  page_size: number;
-  total: number;
-  list: any;
-}
-
 export interface PageVO {
   id?: number;
   page_name: string;
@@ -735,6 +739,22 @@ export interface PasswordLoginReq {
   captcha_code?: string; // 图形验证码
 }
 
+export interface PatchArticleReq {
+  id: number;
+  is_delete?: number;
+  is_top?: number;
+}
+
+export interface PatchCommentsReq {
+  ids: number[];
+  status: number;
+}
+
+export interface PatchMessagesReq {
+  ids: number[];
+  status: number;
+}
+
 export interface PhotoVO {
   id?: number;
   album_id: number;
@@ -746,21 +766,22 @@ export interface PhotoVO {
   updated_at: number;
 }
 
-export interface PingReq {}
+export interface PingReq {
+}
 
 export interface PingResp {
   env: string;
   name: string;
   version: string;
-  description: string;
   runtime: string;
+  description: string;
 }
 
 export interface PublishNotifyMessageReq {
   id: number;
 }
 
-export interface QueryAlbumListReq extends PageQuery {
+export interface QueryAlbumListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -768,7 +789,7 @@ export interface QueryAlbumListReq extends PageQuery {
   is_delete?: number;
 }
 
-export interface QueryApiListReq extends PageQuery {
+export interface QueryApiListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -778,7 +799,7 @@ export interface QueryApiListReq extends PageQuery {
   status?: number; // 状态
 }
 
-export interface QueryArticleListReq extends PageQuery {
+export interface QueryArticleListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -791,14 +812,14 @@ export interface QueryArticleListReq extends PageQuery {
   tag_name?: string;
 }
 
-export interface QueryCategoryListReq extends PageQuery {
+export interface QueryCategoryListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   category_name?: string;
 }
 
-export interface QueryCommentListReq extends PageQuery {
+export interface QueryCommentListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -808,9 +829,10 @@ export interface QueryCommentListReq extends PageQuery {
 }
 
 // 查询上传列表请求
-export interface QueryFileListReq {
-  page?: number; // 页码
-  page_size?: number; // 每页条数
+export interface QueryFileListReq extends ListQuery {
+  page?: number; // 当前页码
+  page_size?: number; // 每页数量
+  sorts?: string[]; // 排序
   file_base?: string; // 文件目录（筛选）
   keyword?: string; // 文件名关键词
 }
@@ -823,14 +845,14 @@ export interface QueryFileListResp {
   page_size: number; // 每页条数
 }
 
-export interface QueryFriendListReq extends PageQuery {
+export interface QueryFriendListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   link_name?: string;
 }
 
-export interface QueryGuestListReq extends PageQuery {
+export interface QueryGuestListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -838,14 +860,23 @@ export interface QueryGuestListReq extends PageQuery {
   ip_source?: string; // IP归属地
 }
 
-export interface QueryLoginLogListReq extends PageQuery {
+export interface QueryLoginLogListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   user_id?: string;
+  status?: number; // 登录状态：0-失败 1-成功
+  start_date?: string;
+  end_date?: string;
 }
 
-export interface QueryMenuListReq extends PageQuery {
+export interface QueryMeLoginLogListReq extends ListQuery {
+  page?: number; // 当前页码
+  page_size?: number; // 每页数量
+  sorts?: string[]; // 排序
+}
+
+export interface QueryMenuListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -854,7 +885,7 @@ export interface QueryMenuListReq extends PageQuery {
   status?: number; // 状态
 }
 
-export interface QueryMessageListReq extends PageQuery {
+export interface QueryMessageListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -862,7 +893,7 @@ export interface QueryMessageListReq extends PageQuery {
   status?: number;
 }
 
-export interface QueryNotifyMessageListReq extends PageQuery {
+export interface QueryNotifyMessageListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -872,7 +903,7 @@ export interface QueryNotifyMessageListReq extends PageQuery {
   target_type?: string;
 }
 
-export interface QueryNotifyRecordListReq extends PageQuery {
+export interface QueryNotifyRecordListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -881,27 +912,31 @@ export interface QueryNotifyRecordListReq extends PageQuery {
   recipient?: string;
 }
 
-export interface QueryNotifyTemplateListReq extends PageQuery {
+export interface QueryNotifyTemplateListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   channel?: string;
 }
 
-export interface QueryOperationLogListReq extends PageQuery {
+export interface QueryOperationLogListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
+  user_id?: string;
+  module?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
-export interface QueryPageListReq extends PageQuery {
+export interface QueryPageListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   page_name?: string;
 }
 
-export interface QueryPhotoListReq extends PageQuery {
+export interface QueryPhotoListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -910,7 +945,7 @@ export interface QueryPhotoListReq extends PageQuery {
 }
 
 // 角色列表查询请求
-export interface QueryRoleListReq extends PageQuery {
+export interface QueryRoleListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -919,30 +954,28 @@ export interface QueryRoleListReq extends PageQuery {
   status?: number; // 状态 0-正常 1-禁用（精确查询）
 }
 
-export interface QueryTagListReq extends PageQuery {
+export interface QueryTagListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   tag_name?: string;
 }
 
-export interface QueryTalkListReq extends PageQuery {
+export interface QueryTalkListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
   status?: number;
 }
 
-export interface QueryUploadLogListReq extends PageQuery {
+export interface QueryUploadLogListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
-  file_base?: string;
-  file_name?: string;
   file_type?: string;
 }
 
-export interface QueryUserInboxRecordListReq extends PageQuery {
+export interface QueryUserInboxRecordListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -960,7 +993,7 @@ export interface QueryUserInboxRecordListResp {
 }
 
 // 用户列表查询请求
-export interface QueryUserListReq extends PageQuery {
+export interface QueryUserListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -969,13 +1002,7 @@ export interface QueryUserListReq extends PageQuery {
   keyword?: string; // 关键词搜索（昵称/手机号）
 }
 
-export interface QueryUserLoginHistoryReq extends PageQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-}
-
-export interface QueryVisitLogListReq extends PageQuery {
+export interface QueryVisitLogListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
   sorts?: string[]; // 排序
@@ -991,8 +1018,20 @@ export interface RefreshTokenReq {
 }
 
 export interface RegionStatVO {
-  name: string;
-  value: number;
+  region: string;
+  count: number;
+}
+
+// 邮箱注册（必须设密码）
+export interface RegisterReq {
+  email: string; // 邮箱
+  password: string; // 密码
+  code: string; // 验证码
+  username?: string; // 用户名
+  nickname?: string; // 昵称
+}
+
+export interface RegisterResp {
 }
 
 // 重置密码请求（免登录，通过验证码）
@@ -1003,7 +1042,8 @@ export interface ResetPasswordReq {
   code: string; // 验证码
 }
 
-export interface ResetPasswordResp {}
+export interface ResetPasswordResp {
+}
 
 // 重置用户密码请求
 export interface ResetUserPasswordReq {
@@ -1013,7 +1053,14 @@ export interface ResetUserPasswordReq {
 
 // 重置用户密码响应
 export interface ResetUserPasswordResp {
-  success: boolean;
+}
+
+export interface RestoreAlbumReq {
+  ids: number[];
+}
+
+export interface RestorePhotoReq {
+  ids: number[];
 }
 
 export interface RevokeNotifyMessageReq {
@@ -1051,7 +1098,8 @@ export interface SendEmailCodeReq {
   type: string; // login / register / reset_password / bind_email
 }
 
-export interface SendEmailCodeResp {}
+export interface SendEmailCodeResp {
+}
 
 // 发送手机验证码
 export interface SendMobileCodeReq {
@@ -1059,7 +1107,8 @@ export interface SendMobileCodeReq {
   type: string; // login / reset_password / bind_phone
 }
 
-export interface SendMobileCodeResp {}
+export interface SendMobileCodeResp {
+}
 
 export interface Server {
   os: any;
@@ -1118,7 +1167,6 @@ export interface TalkVO {
 export interface ThirdPlatformInfo {
   name: string;
   platform: string;
-  authorize_url: string;
   enabled: boolean;
 }
 
@@ -1131,13 +1179,8 @@ export interface Token {
   refresh_expires_at: number; // RefreshToken 过期时间戳（秒）
 }
 
-export interface UnbindUserThirdPartyReq {
+export interface UnbindMeThirdPartyReq {
   platform: string; // 平台
-}
-
-export interface UpdateAlbumDeleteReq {
-  ids: number[];
-  is_delete: number;
 }
 
 export interface UpdateAlbumReq {
@@ -1145,7 +1188,6 @@ export interface UpdateAlbumReq {
   album_name: string;
   album_desc: string;
   album_cover: string;
-  is_delete: number;
   status: number;
 }
 
@@ -1159,11 +1201,6 @@ export interface UpdateApiReq {
   status: number; // 状态 0正常 1禁用
 }
 
-export interface UpdateArticleDeleteReq {
-  id: number;
-  is_delete: number;
-}
-
 export interface UpdateArticleReq {
   id: number;
   article_cover: string;
@@ -1173,23 +1210,13 @@ export interface UpdateArticleReq {
   original_url: string;
   is_top: number;
   status: number;
-  category_name?: string | null;
+  category_name?: string;
   tag_name_list?: string[];
-}
-
-export interface UpdateArticleTopReq {
-  id: number;
-  is_top: number;
 }
 
 export interface UpdateCategoryReq {
   id: number;
   category_name: string;
-}
-
-export interface UpdateCommentStatusReq {
-  ids: number[];
-  status: number;
 }
 
 export interface UpdateFriendReq {
@@ -1200,6 +1227,21 @@ export interface UpdateFriendReq {
   link_intro: string;
 }
 
+export interface UpdateMeAvatarReq {
+  avatar: string; // 头像
+}
+
+export interface UpdateMePasswordReq {
+  old_password: string; // 旧密码
+  new_password: string; // 新密码
+  confirm_password: string; // 确认密码
+}
+
+export interface UpdateMeReq extends UserInfoExt {
+  nickname: string;
+  avatar: string; // 用户头像
+}
+
 export interface UpdateMenuReq extends MenuMeta {
   id: number; // 主键
   parent_id: number; // 父id
@@ -1207,7 +1249,7 @@ export interface UpdateMenuReq extends MenuMeta {
   name: string; // 路由名字
   component: string; // Layout组件
   redirect?: string; // 路由重定向
-  type: string; // 菜单类型（0代表目录、1代表菜单、2代表按钮、3代表外链）
+  type: string; // 菜单类型（CATALOG目录、MENU菜单、BUTTON按钮）
   title?: string; // 菜单标题
   icon?: string; // 菜单图标
   rank?: number; // 排序
@@ -1217,11 +1259,6 @@ export interface UpdateMenuReq extends MenuMeta {
   always_show?: number; // 是否一直显示菜单
   visible?: number; // 菜单是否可见
   status: number; // 状态 0正常 1禁用
-}
-
-export interface UpdateMessageStatusReq {
-  ids: number[];
-  status: number;
 }
 
 export interface UpdateNotifyMessageReq {
@@ -1253,18 +1290,12 @@ export interface UpdatePageReq {
   carousel_covers?: string[];
 }
 
-export interface UpdatePhotoDeleteReq {
-  ids: number[];
-  is_delete: number;
-}
-
 export interface UpdatePhotoReq {
   id: number;
   album_id: number;
   photo_name: string;
   photo_desc: string;
   photo_src: string;
-  is_delete: number;
 }
 
 // 更新角色接口权限请求
@@ -1303,21 +1334,6 @@ export interface UpdateTalkReq {
   status: number;
 }
 
-export interface UpdateUserAvatarReq {
-  avatar: string; // 头像
-}
-
-export interface UpdateUserPasswordReq {
-  old_password: string; // 旧密码
-  new_password: string; // 新密码
-  confirm_password: string; // 确认密码
-}
-
-export interface UpdateUserProfileReq extends UserInfoExt {
-  nickname: string;
-  avatar: string; // 用户头像
-}
-
 // 更新用户角色请求
 export interface UpdateUserRolesReq {
   user_id: string; // 用户ID (UUID)
@@ -1326,7 +1342,6 @@ export interface UpdateUserRolesReq {
 
 // 更新用户角色响应
 export interface UpdateUserRolesResp {
-  success: boolean;
 }
 
 // 更新用户状态请求
@@ -1337,12 +1352,11 @@ export interface UpdateUserStatusReq {
 
 // 更新用户状态响应
 export interface UpdateUserStatusResp {
-  success: boolean;
 }
 
 export interface UploadFileReq {
-  file: any; // 文件
-  file_base: string; // 文件目录
+  file?: any; // 文件
+  file_base?: string; // 文件目录
 }
 
 export interface UploadFileResp {
@@ -1357,7 +1371,6 @@ export interface UploadLogVO {
   file_name: string;
   file_type: string;
   file_size: number;
-  file_md5: string;
   file_url: string;
   created_at: number;
   updated_at: number;

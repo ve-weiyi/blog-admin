@@ -107,7 +107,7 @@ const showVoteNotification = () => {
     message: `
 开始你的创作之旅，记录生活点滴，分享技术心得~
 <br/>
-<a href="https://blog.veweiyi.cn" target="_blank" style="color: var(--el-color-primary); text-decoration: none; font-weight: 500;">📖 访问博客前台</a>
+<a href="https://app.veweiyi.cn" target="_blank" style="color: var(--el-color-primary); text-decoration: none; font-weight: 500;">📖 访问博客前台</a>
 <br/>
 <a href="https://admin.veweiyi.cn" target="_blank" style="color: var(--el-color-primary); text-decoration: none; font-weight: 500;">⚙️ 进入管理后台</a>
 `,

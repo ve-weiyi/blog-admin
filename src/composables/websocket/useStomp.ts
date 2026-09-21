@@ -1,10 +1,13 @@
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import { ref, watch } from "vue";
 
+import { useUserStoreHook } from "@/stores/user";
+import { AuthStorage } from "@/utils/auth";
+
 export interface UseStompOptions {
   /** WebSocket 地址，不传时使用 VITE_APP_WS_ENDPOINT 环境变量 */
   brokerURL?: string;
-  /** 用于鉴权的 token，不传时使用 getAccessToken() 的返回值 */
+  /** 显式指定 token。**一般不要传**：不传时每次建连前从 AuthStorage 实时取；传固定值＝凭据钉死在创建那刻 */
   token?: string;
   login?: string;
   /** 重连延迟，单位毫秒，默认为 8000 */
@@ -22,10 +25,12 @@ export interface UseStompOptions {
 }
 
 /**
- * STOMP WebSocket连接组合式函数
- * 用于管理WebSocket连接的建立、断开、重连和消息订阅
+ * 创建一条 STOMP 连接
+ *
+ * **非单例**：每次调用新建一条连接，实例由调用方持有并负责清理
+ * （在线人数由 useOnlineCount 持有）。与 createSseChannel 同形。
  */
-export function useStomp(options: UseStompOptions = {}) {
+export function createStompClient(options: UseStompOptions = {}) {
   // 默认值：brokerURL 从环境变量中获取，token 从 getAccessToken() 获取
   const defaultBrokerURL = import.meta.env.VITE_APP_WS_ENDPOINT || "";
 
@@ -45,14 +50,27 @@ export function useStomp(options: UseStompOptions = {}) {
   let reconnectTimer: any = null;
   // 连接超时计时器
   let connectionTimeoutTimer: any = null;
-  // 存储所有订阅
+  // 活订阅与订阅意图，均以 destination 为 key（同一主题只保留一个回调）。
+  // 意图单独记一份：stompjs 的订阅随连接失效，重连后由本 hook 自动恢复，
+  // 调用方不必再 watch 连接状态手动重订阅
   const subscriptions = new Map<string, StompSubscription>();
+  const desires = new Map<string, (_message: IMessage) => void>();
 
   // 用于保存 STOMP 客户端的实例
   const client = ref<Client | null>(null);
   // 防止重复连接的标志
   let isConnecting = false;
   let isManualDisconnect = false;
+
+  /** 组装 CONNECT 帧的凭据头。每次建连前调用（见 beforeConnect）：token 会被续期，只有当前这份有效 */
+  const buildConnectHeaders = () => {
+    const login = options.login ?? AuthStorage.getUid() ?? "";
+    return {
+      login,
+      passcode: options.token ?? AuthStorage.getAccessToken() ?? "",
+      client: login,
+    };
+  };
 
   /**
    * 初始化 STOMP 客户端
@@ -83,16 +101,19 @@ export function useStomp(options: UseStompOptions = {}) {
     // 创建 STOMP 客户端
     client.value = new Client({
       brokerURL: brokerURL.value,
-      connectHeaders: {
-        login: options.login ?? "",
-        passcode: options.token ?? "",
-        client: options.login ?? "",
-      },
+      connectHeaders: buildConnectHeaders(),
       debug: options.debug ? console.log : () => {},
       reconnectDelay: 0, // 禁用内置重连机制，使用自定义重连
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
+
+    // 每次建连前重取凭据：token 会在会话中被续期，创建客户端时取的那份很快过期
+    client.value.beforeConnect = async () => {
+      if (client.value) {
+        client.value.connectHeaders = buildConnectHeaders();
+      }
+    };
 
     // 设置连接监听器
     client.value.onConnect = () => {
@@ -102,6 +123,7 @@ export function useStomp(options: UseStompOptions = {}) {
       clearTimeout(connectionTimeoutTimer);
       clearTimeout(reconnectTimer);
       console.log("WebSocket连接已建立");
+      resubscribeAll();
     };
 
     // 设置断开连接监听器
@@ -145,15 +167,10 @@ export function useStomp(options: UseStompOptions = {}) {
       console.error("STOMP错误:", frame.headers, frame.body);
       isConnecting = false;
 
-      // 检查是否是授权错误
-      if (
-        frame.headers?.message?.includes("Unauthorized") ||
-        frame.body?.includes("Unauthorized") ||
-        frame.body?.includes("Token")
-      ) {
-        console.warn("WebSocket授权错误，请检查登录状态");
-        // 授权错误不进行重连
-        isManualDisconnect = true;
+      // 授权错误：凭据可能只是过期，续期一次再重连（与 SSE 通道同一处理）
+      if (/unauthorized|token/i.test(`${frame.headers?.message ?? ""} ${frame.body ?? ""}`)) {
+        console.warn("WebSocket授权错误，尝试续期后重连");
+        void recoverAuth();
       }
     };
   };
@@ -192,6 +209,29 @@ export function useStomp(options: UseStompOptions = {}) {
         connect();
       }
     }, delay);
+  };
+
+  /** 续期单飞标志：避免多次错误并发触发续期 */
+  let refreshing = false;
+
+  /** 凭据失效恢复：续期一次，成功即重连；失败才停止（登录态兜底由 axios 那条链路处理） */
+  const recoverAuth = async () => {
+    if (refreshing) {
+      return;
+    }
+    refreshing = true;
+    try {
+      await useUserStoreHook().refreshTokenOnce();
+      console.debug("WebSocket令牌续期成功，重新建立连接");
+      isManualDisconnect = false;
+      reconnectCount.value = 0;
+      handleReconnect();
+    } catch {
+      console.warn("WebSocket令牌续期失败，停止重连");
+      isManualDisconnect = true;
+    } finally {
+      refreshing = false;
+    }
   };
 
   // 监听 brokerURL 的变化，若地址改变则重新初始化
@@ -270,39 +310,54 @@ export function useStomp(options: UseStompOptions = {}) {
   };
 
   /**
-   * 订阅指定主题
-   * @param destination 目标主题地址
-   * @param callback 接收到消息时的回调函数
-   * @returns 返回订阅 id，用于后续取消订阅
+   * 订阅指定主题，返回取消订阅函数（与 SSE 通道同形，调用方不必自管 id）
+   *
+   * 未连接时也能调用：意图会被记住，连接建立（含每次重连）后自动生效。
    */
-  const subscribe = (destination: string, callback: (_message: IMessage) => void): string => {
-    if (!client.value || !client.value.connected) {
-      console.warn(`尝试订阅 ${destination} 失败: 客户端未连接`);
-      return "";
-    }
+  const subscribe = (destination: string, callback: (_message: IMessage) => void): (() => void) => {
+    desires.set(destination, callback);
+    openSubscription(destination);
 
+    return () => {
+      desires.delete(destination);
+      closeSubscription(destination);
+    };
+  };
+
+  /** 建立一条真实订阅（未连接时静默跳过，等重连后补） */
+  const openSubscription = (destination: string) => {
+    const callback = desires.get(destination);
+    if (!callback || !client.value || !client.value.connected) {
+      return;
+    }
     try {
       const subscription = client.value.subscribe(destination, callback);
-      const subscriptionId = subscription.id;
-      subscriptions.set(subscriptionId, subscription);
-      console.log(`订阅成功: ${destination}, ID: ${subscriptionId}`);
-      return subscriptionId;
+      subscriptions.set(destination, subscription);
+      console.log(`订阅成功: ${destination}, ID: ${subscription.id}`);
     } catch (error) {
       console.error(`订阅 ${destination} 失败:`, error);
-      return "";
     }
   };
 
-  /**
-   * 取消订阅
-   * @param subscriptionId 订阅 id
-   */
-  const unsubscribe = (subscriptionId: string) => {
-    const subscription = subscriptions.get(subscriptionId);
-    if (subscription) {
+  /** 关闭某条真实订阅（不撤销意图） */
+  const closeSubscription = (destination: string) => {
+    const subscription = subscriptions.get(destination);
+    if (!subscription) {
+      return;
+    }
+    try {
       subscription.unsubscribe();
-      subscriptions.delete(subscriptionId);
-      console.log(`已取消订阅: ${subscriptionId}`);
+    } catch (error) {
+      console.warn(`取消订阅 ${destination} 时出错:`, error);
+    }
+    subscriptions.delete(destination);
+  };
+
+  /** 重连后恢复全部订阅意图 */
+  const resubscribeAll = () => {
+    subscriptions.clear();
+    for (const destination of desires.keys()) {
+      openSubscription(destination);
     }
   };
 
@@ -324,15 +379,12 @@ export function useStomp(options: UseStompOptions = {}) {
       connectionTimeoutTimer = null;
     }
 
-    // 清除所有订阅
-    for (const [id, subscription] of subscriptions.entries()) {
-      try {
-        subscription.unsubscribe();
-      } catch (error) {
-        console.warn(`取消订阅 ${id} 时出错:`, error);
-      }
+    // 只退掉当前连接上的活订阅；**订阅意图保留**——
+    // 意图与连接解耦，下次 connect（含自动重连）后会由 resubscribeAll 恢复。
+    // 与 SSE 通道同义：订阅随实例存活，只有 subscribe 返回的取消函数才真正移除它。
+    for (const destination of Array.from(subscriptions.keys())) {
+      closeSubscription(destination);
     }
-    subscriptions.clear();
 
     // 断开连接
     if (client.value) {
@@ -357,7 +409,6 @@ export function useStomp(options: UseStompOptions = {}) {
     isConnected,
     connect,
     subscribe,
-    unsubscribe,
     disconnect,
   };
 }

@@ -29,7 +29,7 @@ const contentConfig: IContentConfig<QueryCategoryListReq> = {
     return CategoryAPI.queryCategoryList(params);
   },
   deleteAction(ids: string) {
-    return CategoryAPI.deleteCategory({
+    return CategoryAPI.batchDeleteCategory({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

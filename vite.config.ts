@@ -51,9 +51,15 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         },
       },
     },
+    // 预览服务端口与 dev 一致，便于统一 stop
+    preview: {
+      port: +env.VITE_APP_PORT,
+    },
     plugins: [
       vue(),
-      ...(env.VITE_MOCK_DEV_SERVER === "true" ? [mockDevServerPlugin()] : []),
+      // 拦截前缀显式传入：插件默认从 server.proxy 推导，而 preview 服务用 preview.proxy，
+      // 配置项对不上会推不出前缀，mock 静默失效
+      ...(env.VITE_MOCK_DEV_SERVER === "true" ? [mockDevServerPlugin({ prefix: [env.VITE_APP_BASE_API] })] : []),
       UnoCSS(),
       // API 自动导入
       AutoImport({

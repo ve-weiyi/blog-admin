@@ -328,11 +328,11 @@
 <script lang="ts" setup>
 import { Camera, Edit, Female, Loading, Male } from "@element-plus/icons-vue";
 import type {
-  UpdateUserPasswordReq,
-  UpdateUserProfileReq,
+  UpdateMePasswordReq,
+  UpdateMeReq,
   UserProfile,
-  BindUserEmailReq,
-  BindUserPhoneReq,
+  BindMeEmailReq,
+  BindMeMobileReq,
 } from "@/api/types";
 import { MeAPI, AuthAPI } from "@/api";
 import { loginHistoryColumns } from "./columns";
@@ -355,10 +355,10 @@ const dialog = reactive({
   type: "" as DialogType,
 });
 
-const userProfileForm = reactive<UpdateUserProfileReq>({} as UpdateUserProfileReq);
-const passwordChangeForm = reactive<UpdateUserPasswordReq>({} as UpdateUserPasswordReq);
-const mobileUpdateForm = reactive<BindUserPhoneReq>({} as BindUserPhoneReq);
-const emailUpdateForm = reactive<BindUserEmailReq>({} as BindUserEmailReq);
+const userProfileForm = reactive<UpdateMeReq>({} as UpdateMeReq);
+const passwordChangeForm = reactive<UpdateMePasswordReq>({} as UpdateMePasswordReq);
+const mobileUpdateForm = reactive<BindMeMobileReq>({} as BindMeMobileReq);
+const emailUpdateForm = reactive<BindMeEmailReq>({} as BindMeEmailReq);
 
 const mobileCountdown = ref(0);
 const mobileTimer = ref<ReturnType<typeof setInterval>>();
@@ -484,7 +484,7 @@ function handleSendEmailCode() {
  */
 const handleSubmit = async () => {
   if (dialog.type === DialogType.ACCOUNT) {
-    MeAPI.updateUserProfile(userProfileForm).then(() => {
+    MeAPI.updateMe(userProfileForm).then(() => {
       ElMessage.success("账号资料修改成功");
       dialog.visible = false;
       loadUserProfile();
@@ -494,18 +494,18 @@ const handleSubmit = async () => {
       ElMessage.error("两次输入的密码不一致");
       return;
     }
-    MeAPI.updateUserPassword(passwordChangeForm).then(() => {
+    MeAPI.updateMePassword(passwordChangeForm).then(() => {
       ElMessage.success("密码修改成功");
       dialog.visible = false;
     });
   } else if (dialog.type === DialogType.MOBILE) {
-    MeAPI.bindUserPhone(mobileUpdateForm).then(() => {
+    MeAPI.bindMeMobile(mobileUpdateForm).then(() => {
       ElMessage.success("手机号绑定成功");
       dialog.visible = false;
       loadUserProfile();
     });
   } else if (dialog.type === DialogType.EMAIL) {
-    MeAPI.bindUserEmail(emailUpdateForm).then(() => {
+    MeAPI.bindMeEmail(emailUpdateForm).then(() => {
       ElMessage.success("邮箱绑定成功");
       dialog.visible = false;
       loadUserProfile();
@@ -526,7 +526,7 @@ const handleFileChange = async (event: Event) => {
     try {
       const res = await uploadFile(file, "blog/avatar/");
       userProfile.value.avatar = res.data.file_info.file_url;
-      await MeAPI.updateUserAvatar({ avatar: res.data.file_info.file_url });
+      await MeAPI.updateMeAvatar({ avatar: res.data.file_info.file_url });
       ElMessage.success("头像上传成功");
     } catch (error) {
       ElMessage.error("头像上传失败" + error);
@@ -536,7 +536,7 @@ const handleFileChange = async (event: Event) => {
 
 /** 加载用户信息 */
 const loadUserProfile = async () => {
-  const res = await MeAPI.getUserProfile();
+  const res = await MeAPI.getMe();
   userProfile.value = res.data;
 };
 
@@ -545,7 +545,7 @@ const tableData = ref<any[]>([]);
 
 const getHistory = async () => {
   loading.value = true;
-  MeAPI.queryUserLoginHistory({})
+  MeAPI.queryMeLoginLogList({})
     .then((response) => {
       tableData.value = response.data.list || [];
     })
@@ -561,7 +561,7 @@ const handleUnbindAccount = (platform: string) => {
     cancelButtonText: "取消",
     type: "warning",
   }).then(() => {
-    MeAPI.unbindUserThirdParty({ platform }).then(() => {
+    MeAPI.unbindMeThirdParty({ platform }).then(() => {
       ElMessage.success("解绑成功");
       loadUserProfile();
     });

@@ -25,7 +25,7 @@ onMounted(() => {
 
   switch (state) {
     case "bind_account":
-      MeAPI.bindUserThirdParty({
+      MeAPI.bindMeThirdParty({
         platform,
         code,
       })

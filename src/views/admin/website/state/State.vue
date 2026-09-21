@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ConfigAPI } from "@/api";
+import { ConfigAPI, OverviewAPI } from "@/api";
 import { onUnmounted, ref } from "vue";
 
 const timer = ref<any>(null);
@@ -142,7 +142,7 @@ const colors = ref<any>([
 ]);
 
 const reload = async () => {
-  ConfigAPI.getSystemState().then((res) => {
+  OverviewAPI.getSystemInfo().then((res) => {
     state.value = res.data;
   });
 };

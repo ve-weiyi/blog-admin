@@ -26,7 +26,7 @@ const contentConfig: IContentConfig<QueryArticleListReq> = {
     return ArticleAPI.queryArticleList(query);
   },
   modifyAction(data) {
-    return ArticleAPI.updateArticleTop(data);
+    return ArticleAPI.patchArticle(data);
   },
   pk: "id",
   toolbar: [
@@ -102,7 +102,7 @@ const contentConfig: IContentConfig<QueryArticleListReq> = {
     },
     {
       label: "浏览量",
-      prop: "views_count",
+      prop: "view_count",
       width: 80,
       align: "center",
     },
