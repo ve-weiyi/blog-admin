@@ -33,7 +33,7 @@ export const usePermissionStore = defineStore("permission", () => {
   /** 生成动态路由 */
   async function generateRoutes(): Promise<RouteRecordRaw[]> {
     try {
-      const res = await MeAPI.getUserMenus();
+      const res = await MeAPI.getMeMenus();
       const menuList = res.data?.list;
 
       const dynamicRoutes =

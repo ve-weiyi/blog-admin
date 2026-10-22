@@ -33,7 +33,7 @@ const contentConfig: IContentConfig<QueryMenuListReq> = {
     return MenuAPI.queryMenuList(params);
   },
   deleteAction(ids: string) {
-    return MenuAPI.deleteMenu({
+    return MenuAPI.batchDeleteMenu({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

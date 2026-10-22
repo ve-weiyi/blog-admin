@@ -1,5 +1,5 @@
 import type { ISearchConfig } from "@/components/CURD/types";
-import { CommentStatusEnum, CommentTypeEnum } from "@/enums/blog";
+import { CommentReviewEnum, CommentStatusEnum, CommentTypeEnum } from "@/enums/blog";
 
 const searchConfig: ISearchConfig = {
   permPrefix: "news:comment",
@@ -51,6 +51,22 @@ const searchConfig: ISearchConfig = {
         { label: "正常", value: CommentStatusEnum.NORMAL },
         { label: "已编辑", value: CommentStatusEnum.EDITED },
         { label: "已删除", value: CommentStatusEnum.DELETED },
+      ],
+    },
+    {
+      type: "select",
+      label: "审核状态",
+      prop: "is_review",
+      attrs: {
+        placeholder: "全部",
+        clearable: true,
+        style: {
+          width: "150px",
+        },
+      },
+      options: [
+        { label: "待审核", value: CommentReviewEnum.PENDING },
+        { label: "已通过", value: CommentReviewEnum.APPROVED },
       ],
     },
   ],

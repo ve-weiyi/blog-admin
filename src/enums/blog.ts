@@ -62,6 +62,12 @@ export enum CommentStatusEnum {
   DELETED = 2, // 已删除（软删除）
 }
 
+/** 评论审核状态枚举 */
+export enum CommentReviewEnum {
+  PENDING = 0, // 待审核
+  APPROVED = 1, // 已通过
+}
+
 /** 留言状态枚举 */
 export enum MessageStatusEnum {
   NORMAL = 0, // 正常

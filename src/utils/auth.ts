@@ -42,11 +42,9 @@ export const AuthStorage = {
     Storage.remove(STORAGE_KEYS.ACCESS_TOKEN);
     Storage.remove(STORAGE_KEYS.REFRESH_TOKEN);
     Storage.remove(STORAGE_KEYS.UID);
-    Storage.remove(STORAGE_KEYS.DEVICE_ID);
     Storage.sessionRemove(STORAGE_KEYS.UID);
     Storage.sessionRemove(STORAGE_KEYS.ACCESS_TOKEN);
     Storage.sessionRemove(STORAGE_KEYS.REFRESH_TOKEN);
-    Storage.sessionRemove(STORAGE_KEYS.DEVICE_ID);
   },
 
   getRememberMe(): boolean {

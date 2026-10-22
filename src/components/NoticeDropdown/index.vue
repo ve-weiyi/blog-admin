@@ -33,7 +33,7 @@
               </el-text>
 
               <div class="text-xs text-gray">
-                {{ formatDateTime(item.published_at) }}
+                {{ formatDateTime(item.sent_at) }}
               </div>
             </div>
           </div>
@@ -66,12 +66,8 @@
     <div v-if="detail" class="p-x-20px">
       <div class="flex-y-center mb-16px text-13px text-color-secondary">
         <span class="flex-y-center">
-          <el-icon><User /></el-icon>
-          {{ detail.published_by }}
-        </span>
-        <span class="ml-2 flex-y-center">
           <el-icon><Timer /></el-icon>
-          {{ formatDateTime(detail.published_at) }}
+          {{ formatDateTime(detail.sent_at) }}
         </span>
       </div>
 

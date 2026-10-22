@@ -1,5 +1,8 @@
 import request from "@/utils/request";
-import type { PingReq, PingResp } from "@/api/types";
+import type {
+  PingReq,
+  PingResp,
+} from "@/api/types";
 
 export const DefaultAPI = {
   /** ping */
@@ -7,7 +10,7 @@ export const DefaultAPI = {
     return request({
       url: `/admin-api/v1/ping`,
       method: "GET",
-      params,
+      params: params,
     });
   },
 };

@@ -7,8 +7,8 @@
   <img src="https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript" />
   <img src="https://img.shields.io/badge/Vite-8.0-purple?logo=vite" />
   <img src="https://img.shields.io/badge/Pinia-3.0-yellow?logo=vuedotjs" />
-  <img src="https://img.shields.io/badge/Element_Plus-2.13-blue?logo=element" />
-  <img src="https://img.shields.io/badge/UnoCSS-66.6-red" />
+  <img src="https://img.shields.io/badge/Element_Plus-2.14-blue?logo=element" />
+  <img src="https://img.shields.io/badge/UnoCSS-66.7-red" />
 </div>
 
 <br/>
@@ -44,12 +44,12 @@ blog-admin 是 blog 博客系统的管理后台项目，基于 Vue 3 + TypeScrip
 | Vue 3 | 渐进式框架 | 3.5 |
 | TypeScript | 类型安全 | 5.9 |
 | Vite | 构建工具 | 8.0 |
-| Element Plus | UI 组件库 | 2.13 |
+| Element Plus | UI 组件库 | 2.14 |
 | Pinia | 状态管理 | 3.0 |
-| UnoCSS | 原子化 CSS | 66.6 |
-| Vue Router | 路由管理 | 5.0 |
-| Axios | HTTP 请求 | 1.13 |
-| ECharts | 数据可视化 | 6.0 |
+| UnoCSS | 原子化 CSS | 66.7 |
+| Vue Router | 路由管理 | 5.1 |
+| Axios | HTTP 请求 | 1.18 |
+| ECharts | 数据可视化 | 6.1 |
 | md-editor-v3 | Markdown 编辑器 | 6.5 |
 
 ## 🎯 后台功能
@@ -72,7 +72,7 @@ blog-admin 是 blog 博客系统的管理后台项目，基于 Vue 3 + TypeScrip
 | 项目 | 说明 | 仓库 |
 |------|------|------|
 | blog-cloud | 博客后端（go-zero 微服务版） | [GitHub](https://github.com/ve-weiyi/blog-cloud) |
-| ve-blog-gin | 博客后端（Gin 单体版） | [GitHub](https://github.com/ve-weiyi/ve-blog-gin) |
+| blog-gin | 博客后端（Gin 单体版） | [GitHub](https://github.com/ve-weiyi/blog-gin) |
 | blog-app | 博客前台 | [GitHub](https://github.com/ve-weiyi/blog-app) |
 | blog-admin | 博客后台 | [GitHub](https://github.com/ve-weiyi/blog-admin) |
 
@@ -81,30 +81,32 @@ blog-admin 是 blog 博客系统的管理后台项目，基于 Vue 3 + TypeScrip
 ```
 blog-admin/
 ├── src/
-│   ├── api/              # API 接口定义
+│   ├── api/              # API 接口定义（由 goctlx 从 .api 生成）
 │   ├── assets/           # 静态资源
 │   ├── components/       # 公共组件
-│   ├── hooks/            # 组合式函数
-│   ├── layout/           # 布局组件
+│   ├── composables/      # 组合式函数（含 SSE）
+│   ├── config/           # 应用配置
+│   ├── constants/        # 常量
+│   ├── directives/       # 自定义指令
+│   ├── enums/            # 枚举
+│   ├── hooks/            # 组合函数
+│   ├── layouts/          # 布局组件
+│   ├── plugins/          # 插件初始化
 │   ├── router/           # 路由配置（动态路由）
-│   ├── store/            # Pinia 状态管理
+│   ├── stores/           # Pinia 状态管理
 │   ├── styles/           # 全局样式
-│   ├── types/            # TypeScript 类型定义
 │   ├── utils/            # 工具函数
 │   └── views/            # 页面组件（按功能模块分目录）
-│       └── admin/        # 后台管理页面
-├── mock/                 # Mock 数据
-├── .husky/               # Git Hooks
-│   ├── deploy/              # 部署配置
-│   │   ├── docker/          # Docker 构建 (Dockerfile + nginx.conf)
-│   │   ├── docker-compose/  # Docker Compose 编排
-│   │   └── k8s/             # Kubernetes 部署 (预留)
+├── types/                # 全局 TypeScript 声明
+├── mock/                 # Mock 数据，文件名与 src/api 分组一一对应
+├── public/               # 公共静态资源
+├── docs/                 # 项目文档
 └── vite.config.ts        # Vite 配置
 ```
 
 ## ⚙️ 环境要求
 
-- **Node.js**: >= 20
+- **Node.js**: `^20.19.0 || >=22.12.0`
 - **pnpm**: >= 9
 
 ## 🚀 快速开始
@@ -115,8 +117,19 @@ git clone https://github.com/ve-weiyi/blog-admin.git && cd blog-admin
 pnpm install
 
 # 2. 启动开发服务器
-pnpm dev                     # → http://localhost:9421
+pnpm dev                     # → http://localhost:9521
 ```
+
+三种模式按接口来源区分：
+
+| 命令 | 接口来源 | 需要后端 | 用途 |
+|------|---------|:-------:|------|
+| `pnpm dev` | mock | 否 | 纯前端开发 |
+| `pnpm test` | 本地后端 `:9421` | 是 | 前后端联调 |
+| `pnpm preview` | 构建产物 + mock | 否 | 预览打包结果 |
+
+> `pnpm preview` 的 mock 由 `vite preview` 的服务端中间件承接，只在本地生效；
+> 构建产物直接托管到 nginx 不会带 mock。
 
 ## 🐳 Docker 部署
 
@@ -126,7 +139,7 @@ docker build -f deploy/docker/frontend/Dockerfile \
   --build-arg DIST_DIR=dist/admin \
   --build-arg PROXY_PASS=admin.veweiyi.cn \
   -t blog-admin-web:latest ./blog-admin
-docker run -d --name blog-admin-web --restart always -p 9520:80 blog-admin-web:latest
+docker run -d --name blog-admin-web --restart always -p 9521:80 blog-admin-web:latest
 
 # 或使用 Docker Compose
 docker compose -f deploy/docker/docker-compose.yml up -d admin-web

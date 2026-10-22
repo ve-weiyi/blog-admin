@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
 import { Lock, Message } from "@element-plus/icons-vue";
-import { EmailRegisterReq } from "@/api/types";
+import { RegisterReq } from "@/api/types";
 import { AuthAPI } from "@/api";
 
 const emit = defineEmits(["update:modelValue"]);
@@ -97,7 +97,7 @@ const loading = ref(false); // 按钮 loading 状态
 const isCapsLock = ref(false); // 是否大写锁定
 const isRead = ref(false);
 
-const model = ref<EmailRegisterReq>({} as EmailRegisterReq);
+const model = ref<RegisterReq>({} as RegisterReq);
 const confirmPassword = ref("");
 
 const rules = computed<FormRules>(() => {
@@ -215,7 +215,7 @@ const submit = async () => {
   }
   await formRef.value?.validate();
   loading.value = true;
-  AuthAPI.emailRegister({
+  AuthAPI.register({
     username: model.value.email,
     ...model.value,
   })

@@ -25,12 +25,30 @@ const contentConfig: IContentConfig<QueryCommentListReq> = {
     return CommentAPI.queryCommentList(query);
   },
   deleteAction(ids: string) {
-    return CommentAPI.deleteComment({
+    return CommentAPI.batchDeleteComment({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },
   pk: "id",
   toolbar: [
+    {
+      name: "approve",
+      text: "通过审核",
+      perm: "review",
+      attrs: {
+        icon: "check",
+        type: "success",
+      },
+    },
+    {
+      name: "reject",
+      text: "驳回",
+      perm: "review",
+      attrs: {
+        icon: "close",
+        type: "warning",
+      },
+    },
     {
       name: "delete",
       text: "删除",
@@ -98,6 +116,13 @@ const contentConfig: IContentConfig<QueryCommentListReq> = {
       templet: "custom",
     },
     {
+      label: "审核",
+      prop: "is_review",
+      width: 100,
+      align: "center",
+      templet: "custom",
+    },
+    {
       label: "类型",
       prop: "type",
       align: "center",
@@ -127,9 +152,27 @@ const contentConfig: IContentConfig<QueryCommentListReq> = {
       label: "操作栏",
       align: "center",
       fixed: "right",
-      width: 160,
+      width: 220,
       templet: "tool",
       operat: [
+        {
+          name: "approve",
+          text: "通过",
+          perm: "review",
+          attrs: {
+            icon: "check",
+            type: "success",
+          },
+        },
+        {
+          name: "reject",
+          text: "驳回",
+          perm: "review",
+          attrs: {
+            icon: "close",
+            type: "warning",
+          },
+        },
         {
           name: "delete",
           text: "删除",

@@ -287,7 +287,7 @@ import { SwitchEnum } from "@/enums/blog";
 
 const websiteConfigForm = ref<WebsiteConfigVO>({
   admin_url: "https://admin.veweiyi.cn",
-  websocket_url: "wss://blog.veweiyi.cn/api/websocket",
+  websocket_url: "wss://app.veweiyi.cn/api/websocket",
   tourist_avatar: "",
   user_avatar: "",
   website_feature: {
@@ -330,7 +330,7 @@ function getWebsiteConfig() {
 
 function updateWebsiteConfig() {
   ConfigAPI.updateWebsiteConfig(websiteConfigForm.value).then((res) => {
-    ElMessage.success(res.msg);
+    ElMessage.success(res.message);
   });
 }
 

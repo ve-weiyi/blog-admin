@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryMessageListReq> = {
     return MessageAPI.queryMessageList(query);
   },
   deleteAction(ids: string) {
-    return MessageAPI.deleteMessage({
+    return MessageAPI.batchDeleteMessage({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

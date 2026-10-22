@@ -19,15 +19,19 @@ const route = useRoute();
 onMounted(() => {
   const platform = route.params.platform as string;
   const code = route.query.code as string;
-  const state = route.query.state as string;
+  // state 是服务端签发的一次性 nonce；跳转意图由本地保存
+  const state = (route.query.state as string) || "";
+  const intent = sessionStorage.getItem("oauth_intent") || "";
+  sessionStorage.removeItem("oauth_intent");
 
   console.log("route", platform, code, state);
 
-  switch (state) {
+  switch (intent) {
     case "bind_account":
-      MeAPI.bindUserThirdParty({
+      MeAPI.bindMeThirdParty({
         platform,
         code,
+        state,
       })
         .then(() => {
           ElMessage.success("绑定成功");
@@ -49,6 +53,7 @@ onMounted(() => {
         .thirdLogin({
           platform,
           code,
+          state,
         })
         .then(() => {
           ElMessage.success("登录成功");
@@ -60,7 +65,7 @@ onMounted(() => {
           });
 
           // 跳转回原页面
-          const loginUrl = state;
+          const loginUrl = intent;
           if (loginUrl != null && loginUrl !== "") {
             router.push(loginUrl);
           } else {

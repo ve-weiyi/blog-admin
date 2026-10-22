@@ -157,9 +157,8 @@ const handleRecover = async () => {
       type: "warning",
     });
 
-    await PhotoAPI.updatePhotoDelete({
+    await PhotoAPI.batchRestorePhoto({
       ids: selectPhotoIdList.value,
-      is_delete: 0,
     });
 
     ElMessage.success("恢复成功");
@@ -180,7 +179,7 @@ const handleDelete = async () => {
       type: "warning",
     });
 
-    await PhotoAPI.deletePhoto({ ids: selectPhotoIdList.value });
+    await PhotoAPI.batchDeletePhoto({ ids: selectPhotoIdList.value });
 
     ElMessage.success("销毁成功");
     selectPhotoIdList.value = [];

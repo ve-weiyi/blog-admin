@@ -4,9 +4,10 @@
 declare global {
   /** API 响应包装类型 */
   interface IApiResponse<T = any> {
-    code: number;
+    code: string;
     data: T;
-    msg: string;
+    message: string;
+    trace_id: string;
   }
 
   /** API 响应结构（request.ts 响应拦截器使用） */

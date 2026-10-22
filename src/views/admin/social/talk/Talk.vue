@@ -245,7 +245,7 @@ function handleDelete(item: TalkVO) {
     cancelButtonText: "取消",
     type: "warning",
   }).then(() => {
-    TalkAPI.deleteTalk({ ids: [item.id!] })
+    TalkAPI.batchDeleteTalk({ ids: [item.id!] })
       .then(() => {
         ElMessage.success("删除成功");
         refreshList();

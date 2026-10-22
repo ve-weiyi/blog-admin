@@ -29,7 +29,7 @@ const contentConfig: IContentConfig<QueryFriendListReq> = {
     return FriendAPI.queryFriendList(params);
   },
   deleteAction(ids: string) {
-    return FriendAPI.deleteFriend({
+    return FriendAPI.batchDeleteFriend({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

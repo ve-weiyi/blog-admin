@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryUploadLogListReq> = {
     return UploadLogAPI.queryUploadLogList(query);
   },
   deleteAction(ids: string) {
-    return UploadLogAPI.deleteUploadLog({
+    return UploadLogAPI.batchDeleteUploadLog({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

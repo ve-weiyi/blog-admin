@@ -7,6 +7,7 @@ import { AuthStorage } from "@/utils/auth";
 import { usePermissionStoreHook } from "@/stores/permission";
 import { useDictStoreHook } from "@/stores/dict";
 import { useTagsViewStore } from "@/stores";
+import { setupSse, cleanupSseServices } from "@/composables/sse";
 
 export const useUserStore = defineStore("user", () => {
   // 用户信息
@@ -39,6 +40,8 @@ export const useUserStore = defineStore("user", () => {
             res.data.token?.refresh_token ?? "",
             rememberMe.value
           );
+          // 凭据已就位，立即建推送连接（否则要等重试间隔）
+          setupSse();
           resolve(res.data);
         })
         .catch((error) => {
@@ -69,7 +72,7 @@ export const useUserStore = defineStore("user", () => {
    */
   function getUserInfo() {
     return new Promise<UserProfile>((resolve, reject) => {
-      MeAPI.getUserProfile()
+      MeAPI.getMe()
         .then((res) => {
           if (!res) {
             reject("Verification failed, please Login again.");
@@ -101,6 +104,8 @@ export const useUserStore = defineStore("user", () => {
             res.data.token?.refresh_token ?? "",
             false
           );
+          // 凭据已就位，立即建推送连接（否则要等重试间隔）
+          setupSse();
           resolve(res.data);
         })
         .catch((error) => {
@@ -112,11 +117,12 @@ export const useUserStore = defineStore("user", () => {
   /**
    * 第三方登录（OAuth）
    */
-  function thirdLogin(loginData: { platform: string; code: string }) {
+  function thirdLogin(loginData: { platform: string; code: string; state?: string }) {
     return new Promise<LoginResp>((resolve, reject) => {
       AuthAPI.oauthLogin({
         platform: loginData.platform,
         code: loginData.code,
+        state: loginData.state,
       })
         .then((res) => {
           rememberMe.value = false;
@@ -126,6 +132,8 @@ export const useUserStore = defineStore("user", () => {
             res.data.token?.refresh_token ?? "",
             false
           );
+          // 凭据已就位，立即建推送连接（否则要等重试间隔）
+          setupSse();
           resolve(res.data);
         })
         .catch((error) => {
@@ -172,6 +180,8 @@ export const useUserStore = defineStore("user", () => {
    */
   function resetUserState(): void {
     AuthStorage.clearAuth();
+    // 凭据已清，推送连接必须主动断开：否则它会带着旧令牌反复重连
+    cleanupSseServices();
     userInfo.value = {} as UserProfile;
   }
 
@@ -186,7 +196,9 @@ export const useUserStore = defineStore("user", () => {
     }
 
     const res = await AuthAPI.refreshToken({
-      user_id: userInfo.value.user_id,
+      // 凭据只从 AuthStorage 读：userInfo 是异步回填的展示态缓存，
+      // 硬刷新后为空，取它会让刷新请求缺 user_id 而必然失败
+      user_id: AuthStorage.getUid(),
       grant_type: "refresh_token",
       refresh_token: currentRefreshToken,
     });
@@ -197,7 +209,7 @@ export const useUserStore = defineStore("user", () => {
     }
 
     AuthStorage.setTokens(
-      res.data.user_id ?? "",
+      res.data.user_id || AuthStorage.getUid(),
       token.access_token,
       token.refresh_token ?? "",
       AuthStorage.getRememberMe()

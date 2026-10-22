@@ -203,7 +203,7 @@ const handleDelete = async (data: PageVO) => {
       type: "warning",
     });
 
-    await PageAPI.deletePage({ ids: [data.id!] });
+    await PageAPI.batchDeletePage({ ids: [data.id!] });
     ElMessage.success("删除成功");
     refreshList();
   } catch (error: any) {

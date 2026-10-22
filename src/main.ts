@@ -25,6 +25,9 @@ import * as ElementPlusIcons from "@element-plus/icons-vue";
 // ===== 路由守卫 =====
 import { setupPermissionGuard } from "@/router/guards/permission";
 
+// ===== 通知推送 =====
+import { setupSse } from "@/composables/sse";
+
 // 创建 Vue 应用实例
 const app = createApp(App);
 
@@ -39,5 +42,8 @@ Object.entries(ElementPlusIcons).forEach(([name, comp]) => app.component(name, c
 // 3️⃣ 路由守卫
 setupPermissionGuard();
 
-// 4️⃣ 挂载应用
+// 4️⃣ 通知推送（未登录时连接会等待凭据，登录成功后由 store 立即建连）
+setupSse();
+
+// 5️⃣ 挂载应用
 app.mount("#app");

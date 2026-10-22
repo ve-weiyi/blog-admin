@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted, watch } from "vue";
-import { useStomp } from "@/hooks";
+import { createStompClient } from "./useStomp";
 import { ElMessage } from "element-plus";
 import { AuthStorage } from "@/utils/auth";
 
@@ -21,23 +21,17 @@ export function useOnlineCount() {
   const isConnecting = ref(false);
 
   // 使用Stomp客户端 - 配置使用指数退避策略
-  const {
-    connect,
-    subscribe,
-    unsubscribe,
-    disconnect,
-    isConnected: stompConnected,
-  } = useStomp({
-    token: AuthStorage.getAccessToken(),
-    login: AuthStorage.getUid(),
+  // 不传 token/login：由 createStompClient 在每次建连前从 AuthStorage 实时取，
+  // 否则 token 续期后重连仍会用创建时那份旧凭据
+  const { connect, subscribe, disconnect, isConnected: stompConnected } = createStompClient({
     reconnectDelay: 15000, // 重连基础延迟
     maxReconnectAttempts: 3, // 重连次数上限
     connectionTimeout: 10000, // 连接超时
     useExponentialBackoff: true, // 启用指数退避
   });
 
-  // 订阅ID
-  let subscriptionId = "";
+  // 取消当前订阅；subscribe 返回取消函数，调用方不必自管 id
+  let unsubscribeOnline: (() => void) | null = null;
 
   // 连接超时计时器
   let connectionTimeoutTimer: any = null;
@@ -65,12 +59,10 @@ export function useOnlineCount() {
     }
 
     // 如果已经订阅，先取消订阅
-    if (subscriptionId) {
-      unsubscribe(subscriptionId);
-    }
+    unsubscribeOnline?.();
 
     // 订阅在线用户计数主题
-    subscriptionId = subscribe("/topic/system/online", (message) => {
+    unsubscribeOnline = subscribe("/topic/system/online", (message) => {
       try {
         const data = message.body;
 
@@ -146,10 +138,8 @@ export function useOnlineCount() {
    * 关闭WebSocket连接
    */
   const closeWebSocket = () => {
-    if (subscriptionId) {
-      unsubscribe(subscriptionId);
-      subscriptionId = "";
-    }
+    unsubscribeOnline?.();
+    unsubscribeOnline = null;
 
     // 清除连接超时计时器
     if (connectionTimeoutTimer) {

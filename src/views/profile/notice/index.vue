@@ -178,7 +178,7 @@ function handleReadNotice(row: any) {
 
 function handleDeleteNotice(row: any) {
   ElMessageBox.confirm("确认删除该通知？", "提示", { type: "warning" }).then(() => {
-    NotifyRecordAPI.deleteNotifyRecord({ ids: [row.id] }).then(() => {
+    NotifyRecordAPI.batchDeleteNotifyRecord({ ids: [row.id] }).then(() => {
       ElMessage.success("删除成功");
       handleQuery();
     });

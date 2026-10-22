@@ -83,6 +83,21 @@ function handleToolbarClick(name: string) {
   switch (name) {
     case "write":
       router.push({ path: `/article/publish` });
+      break;
+    case "exports": {
+      const rows = contentRef.value?.getSelectionData() ?? [];
+      ArticleAPI.exportArticle({ ids: rows.map((row) => row.id) }).then((res) => {
+        const blob = new Blob([res.data.content], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = res.data.file_name;
+        link.click();
+        URL.revokeObjectURL(url);
+        ElMessage.success("导出成功");
+      });
+      break;
+    }
   }
 }
 
@@ -93,7 +108,7 @@ function handleOperateClick(data: IOperateData) {
       router.push({ path: `/article/edit/${data.row.id}` });
       break;
     case "delete":
-      ArticleAPI.updateArticleDelete({
+      ArticleAPI.patchArticle({
         id: data.row.id,
         is_delete: ArticleDeleteEnum.YES,
       }).then(() => {
@@ -102,7 +117,7 @@ function handleOperateClick(data: IOperateData) {
       });
       break;
     case "restore":
-      ArticleAPI.updateArticleDelete({
+      ArticleAPI.patchArticle({
         id: data.row.id,
         is_delete: ArticleDeleteEnum.NO,
       }).then(() => {

@@ -206,7 +206,7 @@ const article = ref<ArticleVO>({
   article_title: useDateFormat(new Date(), "YYYY-MM-DD").value,
   article_content: "",
   article_cover: "",
-  category_name: null,
+  category_name: "",
   tag_name_list: [],
   article_type: ArticleTypeEnum.ORIGINAL,
   created_at: 0,
@@ -216,7 +216,7 @@ const article = ref<ArticleVO>({
   is_delete: 0,
   like_count: 0,
   updated_at: 0,
-  views_count: 0,
+  view_count: 0,
 });
 
 const mdRef = ref(null);
@@ -307,7 +307,7 @@ function saveOrUpdateArticle() {
     ElMessage.error("文章内容不能为空");
     return;
   }
-  if (article.value.category_name === null) {
+  if (!article.value.category_name) {
     ElMessage.error("文章分类不能为空");
     return;
   }
@@ -412,7 +412,7 @@ function addCategory(name: string) {
 
 // 移除文章分类
 function removeCategory() {
-  article.value.category_name = null;
+  article.value.category_name = "";
 }
 
 function searchTags(keywords: string, cb: any) {

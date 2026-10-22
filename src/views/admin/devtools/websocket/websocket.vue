@@ -90,9 +90,8 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { useStomp } from "@/hooks/websocket/core/useStomp";
+import { createStompClient } from "@/composables/websocket";
 import { useUserStoreHook } from "@/stores";
-import { AuthStorage } from "@/utils/auth";
 
 const userStore = useUserStoreHook();
 // 用于手动调整 WebSocket 地址
@@ -110,18 +109,23 @@ const topicMessage = ref("亲爱的朋友们，系统已恢复最新状态。");
 const queneMessage = ref("Hi, " + userStore.userInfo.username + " 这里是点对点消息示例！");
 const receiver = ref("root");
 
-// 调用 useStomp hook，默认使用 socketEndpoint 和 token（此处用 getAccessToken()）
-const { isConnected, connect, subscribe, disconnect, client } = useStomp({
+// 不传 token/login：由 createStompClient 每次建连前从 AuthStorage 实时取
+const { isConnected, connect, subscribe, disconnect, client } = createStompClient({
   debug: true,
-  token: AuthStorage.getAccessToken(),
-  login: AuthStorage.getUid(),
 });
+
+// 订阅只登记一次：连接建立与每次重连后由 createStompClient 自动重订
+let subscribed = false;
 
 watch(
   () => isConnected.value,
   (connected) => {
     console.log("WebSocket 连接状态:", connected);
     if (connected) {
+      if (subscribed) {
+        return;
+      }
+      subscribed = true;
       // 连接成功后，订阅广播和点对点消息主题
       subscribe("/topic/system/broadcast", (res) => {
         const messageData = JSON.parse(res.body) as MessageType;

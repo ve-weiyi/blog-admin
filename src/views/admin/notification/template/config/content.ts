@@ -25,7 +25,7 @@ const contentConfig: IContentConfig<QueryNotifyTemplateListReq> = {
     return NotifyTemplateAPI.queryNotifyTemplateList(query);
   },
   deleteAction(ids: string) {
-    return NotifyTemplateAPI.deleteNotifyTemplate({
+    return NotifyTemplateAPI.batchDeleteNotifyTemplate({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

@@ -26,7 +26,7 @@ const contentConfig: IContentConfig<QueryRoleListReq> = {
     return RoleAPI.queryRoleList(params);
   },
   deleteAction(ids: string) {
-    return RoleAPI.deleteRole({
+    return RoleAPI.batchDeleteRole({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },

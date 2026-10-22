@@ -161,7 +161,7 @@ function startCountdown() {
 function sendCaptchaCode() {
   AuthAPI.sendMobileCode({
     mobile: loginFormData.value.mobile,
-    type: "login",
+    type: "mobile_login",
   })
     .then(() => {
       ElMessage.success("验证码已发送，请注意查收");

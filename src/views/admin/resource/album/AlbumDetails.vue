@@ -262,10 +262,9 @@ const handleSingleDelete = async (photo: PhotoVO) => {
       type: "warning",
     });
 
-    await PhotoAPI.updatePhotoDelete({
+    await PhotoAPI.batchDeletePhoto({
       ids: [photo.id!],
-      is_delete: 1,
-    });
+      });
 
     ElMessage.success("删除成功");
     refreshList();
@@ -288,10 +287,9 @@ const handleDelete = async () => {
       type: "warning",
     });
 
-    await PhotoAPI.updatePhotoDelete({
+    await PhotoAPI.batchDeletePhoto({
       ids: selectPhotoIdList.value,
-      is_delete: 1,
-    });
+      });
 
     ElMessage.success("删除成功");
     selectPhotoIdList.value = [];

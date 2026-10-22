@@ -5,7 +5,7 @@ export const WebsocketAPI = {
   /** WebSocket消息 */
   websocket(): Promise<ApiResponse<any>> {
     return request({
-      url: `/admin-api/v1/websocket`,
+      url: `/admin-api/v1/ws`,
       method: "GET",
     });
   },

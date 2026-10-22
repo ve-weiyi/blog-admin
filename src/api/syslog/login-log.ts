@@ -1,23 +1,28 @@
 import request from "@/utils/request";
-import type { BatchResp, DeleteLoginLogReq, PageResult, QueryLoginLogListReq } from "@/api/types";
+import type {
+  BatchResp,
+  DeleteLoginLogReq,
+  ListResult,
+  QueryLoginLogListReq,
+} from "@/api/types";
 
 /** 登录日志 */
 export const LoginLogAPI = {
-  /** 批量删除登录日志 */
-  deleteLoginLog(data?: DeleteLoginLogReq): Promise<ApiResponse<BatchResp>> {
+  /** 获取登录日志列表 */
+  queryLoginLogList(params?: QueryLoginLogListReq): Promise<ApiResponse<ListResult>> {
     return request({
-      url: `/admin-api/v1/login_log/delete_login_log`,
-      method: "DELETE",
-      data,
+      url: `/admin-api/v1/login-logs`,
+      method: "GET",
+      params: params,
     });
   },
 
-  /** 获取登录日志列表 */
-  queryLoginLogList(data?: QueryLoginLogListReq): Promise<ApiResponse<PageResult>> {
+  /** 批量删除登录日志 */
+  batchDeleteLoginLog(data?: DeleteLoginLogReq): Promise<ApiResponse<BatchResp>> {
     return request({
-      url: `/admin-api/v1/login_log/query_login_log_list`,
+      url: `/admin-api/v1/login-logs/batch-delete`,
       method: "POST",
-      data,
+      data: data,
     });
   },
 };
