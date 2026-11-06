@@ -1,8 +1,8 @@
 import type { IContentConfig } from "@/components/CURD/types";
-import type { QueryNotifyRecordListReq } from "@/api/types";
-import { NotifyRecordAPI } from "@/api";
+import type { QueryDeliveryListReq } from "@/api/types";
+import { DeliveryAPI } from "@/api";
 
-const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
+const contentConfig: IContentConfig<QueryDeliveryListReq> = {
   pageTitle: "投递记录",
   permPrefix: "notification:delivery",
   table: {
@@ -21,11 +21,11 @@ const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
       list: res.data.list || [],
     };
   },
-  indexAction(query: QueryNotifyRecordListReq) {
-    return NotifyRecordAPI.queryNotifyRecordList(query);
+  indexAction(query: QueryDeliveryListReq) {
+    return DeliveryAPI.queryDeliveryList(query);
   },
   deleteAction(ids: string) {
-    return NotifyRecordAPI.batchDeleteNotifyRecord({
+    return DeliveryAPI.batchDeleteDelivery({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },
@@ -57,9 +57,10 @@ const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
       sortable: true,
     },
     {
-      label: "消息ID",
-      prop: "message_id",
-      width: 80,
+      // 站内信的「投递」就是条目本身，这里只出现外部渠道
+      label: "条目ID",
+      prop: "notification_id",
+      width: 90,
       align: "center",
     },
     {
@@ -72,8 +73,37 @@ const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
     {
       label: "接收者",
       prop: "recipient",
-      width: 200,
+      width: 220,
       align: "center",
+    },
+    {
+      label: "状态",
+      prop: "status",
+      width: 100,
+      align: "center",
+      templet: "custom",
+    },
+    {
+      label: "尝试次数",
+      prop: "attempts",
+      width: 90,
+      align: "center",
+    },
+    {
+      label: "下次重试",
+      prop: "next_retry_at",
+      width: 170,
+      align: "center",
+      templet: "date",
+      dateFormat: "YYYY/MM/DD HH:mm:ss",
+    },
+    {
+      label: "错误信息",
+      prop: "error_msg",
+      minWidth: 200,
+      width: 0,
+      align: "center",
+      show: false,
     },
     {
       label: "模板编码",
@@ -91,34 +121,11 @@ const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
       show: false,
     },
     {
-      label: "状态",
-      prop: "status",
-      width: 100,
-      align: "center",
-      templet: "custom",
-    },
-    {
-      label: "业务ID",
-      prop: "biz_id",
-      width: 150,
+      label: "厂商回执",
+      prop: "provider_msg_id",
+      width: 160,
       align: "center",
       show: false,
-    },
-    {
-      label: "错误信息",
-      prop: "error_msg",
-      width: 200,
-      align: "center",
-      show: false,
-    },
-    {
-      label: "阅读时间",
-      prop: "read_at",
-      width: 170,
-      align: "center",
-      sortable: true,
-      templet: "date",
-      dateFormat: "YYYY/MM/DD HH:mm:ss",
     },
     {
       label: "发送时间",
@@ -142,9 +149,18 @@ const contentConfig: IContentConfig<QueryNotifyRecordListReq> = {
       label: "操作栏",
       align: "center",
       fixed: "right",
-      width: 100,
+      width: 150,
       templet: "tool",
       operat: [
+        {
+          name: "redeliver",
+          text: "重发",
+          perm: "edit",
+          attrs: {
+            icon: "refresh",
+            type: "primary",
+          },
+        },
         {
           name: "delete",
           text: "删除",

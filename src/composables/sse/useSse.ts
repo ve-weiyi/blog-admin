@@ -49,7 +49,7 @@ const AcceptEventStream = "text/event-stream";
 
 function createSseConnection(options: UseSseOptions = {}) {
   const baseUrl = import.meta.env.VITE_APP_BASE_API;
-  const defaultUrl = `${baseUrl}/notify-messages/stream`;
+  const defaultUrl = `${baseUrl}/announcements/stream`;
 
   const config = {
     url: options.url ?? defaultUrl,

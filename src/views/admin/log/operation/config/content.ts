@@ -111,7 +111,7 @@ const contentConfig: IContentConfig<QueryOperationLogListReq> = {
       align: "center",
     },
     {
-      label: "响应耗时",
+      label: "响应耗时(ms)",
       prop: "cost",
       width: 0,
       minWidth: 120,

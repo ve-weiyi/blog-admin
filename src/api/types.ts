@@ -14,6 +14,21 @@ export interface AlbumVO {
   photo_count: number;
 }
 
+export interface AnnouncementVO {
+  id?: number;
+  title: string;
+  content: string;
+  category: string;
+  level: string;
+  target_type: string;
+  target_ids: string;
+  status: string;
+  published_at: number;
+  published_by: string;
+  created_at: number;
+  updated_at: number;
+}
+
 export interface ApiVO {
   id?: number; // 主键id
   parent_id: number; // 分组id
@@ -54,10 +69,6 @@ export interface ArticleViewVO {
   id?: number;
   article_title: string;
   view_count: number;
-}
-
-export interface BatchMarkRecordsReadReq {
-  ids: number[];
 }
 
 export interface BatchResp {
@@ -128,6 +139,15 @@ export interface CreateAlbumReq {
   status: number;
 }
 
+export interface CreateAnnouncementReq {
+  title: string;
+  content: string;
+  category: string;
+  level: string;
+  target_type: string;
+  target_ids?: string;
+}
+
 export interface CreateApiReq {
   parent_id: number; // 分组id
   name: string; // api名称
@@ -167,24 +187,6 @@ export interface CreateMenuReq extends MenuMeta {
   component: string; // Layout组件
   redirect?: string; // 路由重定向
   children?: CreateMenuReq[];
-}
-
-export interface CreateNotifyMessageReq {
-  title: string;
-  content: string;
-  category: string;
-  level: string;
-  target_type: string;
-  target_ids?: string;
-}
-
-export interface CreateNotifyTemplateReq {
-  code: string;
-  channel: string;
-  scene: string;
-  title: string;
-  content: string;
-  enabled?: number;
 }
 
 export interface CreatePageReq {
@@ -281,23 +283,15 @@ export interface DeleteLoginLogReq {
   ids: number[];
 }
 
+export interface DeleteMeNotificationReq {
+  group_key: string; // 列表下发的不透明键
+}
+
 export interface DeleteMenuReq {
   ids: number[]; // 主键id
 }
 
 export interface DeleteMessageReq {
-  ids: number[];
-}
-
-export interface DeleteNotifyMessageReq {
-  ids: number[];
-}
-
-export interface DeleteNotifyRecordReq {
-  ids: number[];
-}
-
-export interface DeleteNotifyTemplateReq {
   ids: number[];
 }
 
@@ -343,6 +337,23 @@ export interface DestroyPhotoReq {
 }
 
 // 邮箱验证码登录（仅登录，未注册报错）
+export interface DeliveryVO {
+  id?: number;
+  notification_id: number;
+  channel: string;
+  recipient: string;
+  status: string;
+  template_code: string;
+  content: string;
+  provider_msg_id: string;
+  error_msg: string;
+  attempts: number;
+  next_retry_at: number;
+  sent_at: number;
+  created_at: number;
+  updated_at: number;
+}
+
 export interface EmailLoginReq {
   email: string; // 邮箱
   code: string; // 验证码
@@ -383,6 +394,10 @@ export interface FriendVO {
 }
 
 export interface GetAlbumReq {
+  id: number;
+}
+
+export interface GetAnnouncementReq {
   id: number;
 }
 
@@ -450,14 +465,6 @@ export interface GetMeRolesResp {
 
 export interface GetMenuReq {
   id: number; // 主键
-}
-
-export interface GetNotifyMessageReq {
-  id: number;
-}
-
-export interface GetNotifyTemplateReq {
-  id: number;
 }
 
 // 第三方登录授权URL
@@ -557,11 +564,12 @@ export interface LoginLogVO {
   id?: number;
   user_id: string; // 用户id
   device_id: string; // 终端id
-  login_type: string; // 登录类型
+  event_type: number; // 事件类型：1-登录 2-登出
+  login_type: string; // 登录类型（登出事件为空）
+  logout_type: string; // 登出类型（登录事件为空）
   status: number; // 登录状态：0-失败 1-成功
   fail_reason: string; // 失败原因
-  login_at: number; // 登录时间（对应 proto 的 created_at）
-  logout_at: number; // 登出时间
+  login_at: number; // 事件时间（对应 proto 的 created_at）
   user_info: UserInfoVO; // 用户信息
   guest_info: GuestInfoVO; // 游客信息
 }
@@ -580,12 +588,13 @@ export interface LogoutReq {
 export interface LogoutResp {
 }
 
-export interface MarkAllRecordsReadReq {
-  user_id: string;
+export interface MeUnreadCountReq {
+  groups?: string[];
 }
 
-export interface MarkRecordReadReq {
-  id: number;
+export interface MeUnreadCountResp {
+  total: number;
+  group_counts: Record<string, number>;
 }
 
 export interface MenuMeta {
@@ -646,52 +655,50 @@ export interface MobileLoginReq {
   code: string; // 验证码
 }
 
-export interface NotifyMessageVO {
+// 第三方登录（前端携带code）
+export interface NotificationEventVO {
   id?: number;
-  title: string;
-  content: string;
-  category: string;
-  level: string;
-  target_type: string;
-  target_ids: string;
+  scene: string;
+  actor_id: string;
+  object_type: string;
+  object_id: number;
+  audience_type: string;
+  audience_total: number; // 进度分母，扇出开始时确定
+  processed: number;
   status: string;
-  published_at: number;
-  published_by: string;
+  cursor: number;
   created_at: number;
   updated_at: number;
 }
 
-export interface NotifyRecordVO {
-  id?: number;
-  message_id: number;
-  channel: string;
-  recipient: string;
-  template_code: string;
-  content: string;
-  status: string;
-  biz_id: string;
-  error_msg: string;
-  read_at: number;
-  sent_at: number;
-  created_at: number;
-  title: string;
-  category: string;
-  level: string;
-}
-
-export interface NotifyTemplateVO {
-  id?: number;
-  code: string;
-  channel: string;
+export interface NotificationGroupVO {
+  group_key: string; // 不透明键，原样回传用于整组已读 / 删除
   scene: string;
   title: string;
   content: string;
-  enabled: number;
-  created_at: number;
-  updated_at: number;
+  link: string;
+  level: string;
+  actor_count: number;
+  latest_actor_name: string;
+  latest_at: number;
+  unread: boolean;
 }
 
-// 第三方登录（前端携带code）
+export interface NotificationItemVO {
+  id?: number;
+  event_id: number;
+  scene: string;
+  actor_id: string;
+  actor_name: string;
+  object_type: string;
+  object_id: number;
+  title: string;
+  content: string;
+  link: string;
+  read_at: number;
+  created_at: number;
+}
+
 export interface OauthLoginReq {
   platform: string; // 平台
   code: string; // 授权码
@@ -719,7 +726,7 @@ export interface OperationLogVO {
   request_data: string;
   response_data: string;
   response_status: number;
-  cost: string;
+  cost: number;
   created_at: number;
   updated_at: number;
   user_info: UserInfoVO;
@@ -793,7 +800,7 @@ export interface PingResp {
   description: string;
 }
 
-export interface PublishNotifyMessageReq {
+export interface PublishAnnouncementReq {
   id: number;
 }
 
@@ -803,6 +810,13 @@ export interface QueryAlbumListReq extends ListQuery {
   sorts?: string[]; // 排序
   album_name?: string;
   is_delete?: number;
+}
+
+export interface QueryAnnouncementListReq extends ListQuery {
+  category?: string;
+  level?: string;
+  status?: string;
+  target_type?: string;
 }
 
 export interface QueryApiListReq extends ListQuery {
@@ -848,6 +862,13 @@ export interface QueryCommentListReq extends ListQuery {
 }
 
 // 查询上传列表请求
+export interface QueryDeliveryListReq extends ListQuery {
+  channel?: string;
+  status?: string;
+  recipient?: string;
+  notification_id?: number; // 从收件箱条目下钻
+}
+
 export interface QueryFileListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
@@ -895,6 +916,11 @@ export interface QueryMeLoginLogListReq extends ListQuery {
   sorts?: string[]; // 排序
 }
 
+export interface QueryMeNotificationListReq extends ListQuery {
+  groups?: string[];
+  unread_only?: boolean;
+}
+
 export interface QueryMenuListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
@@ -912,30 +938,9 @@ export interface QueryMessageListReq extends ListQuery {
   status?: number;
 }
 
-export interface QueryNotifyMessageListReq extends ListQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-  category?: string;
-  level?: string;
+export interface QueryNotificationEventListReq extends ListQuery {
   status?: string;
-  target_type?: string;
-}
-
-export interface QueryNotifyRecordListReq extends ListQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-  channel?: string;
-  status?: string;
-  recipient?: string;
-}
-
-export interface QueryNotifyTemplateListReq extends ListQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-  channel?: string;
+  scene?: string;
 }
 
 export interface QueryOperationLogListReq extends ListQuery {
@@ -973,6 +978,11 @@ export interface QueryRoleListReq extends ListQuery {
   status?: number; // 状态 0-正常 1-禁用（精确查询）
 }
 
+export interface QueryStalledEventListReq {
+  before_seconds?: number;
+  limit?: number;
+}
+
 export interface QueryTagListReq extends ListQuery {
   page?: number; // 当前页码
   page_size?: number; // 每页数量
@@ -994,23 +1004,6 @@ export interface QueryUploadLogListReq extends ListQuery {
   file_type?: string;
 }
 
-export interface QueryUserInboxRecordListReq extends ListQuery {
-  page?: number; // 当前页码
-  page_size?: number; // 每页数量
-  sorts?: string[]; // 排序
-  user_id: string;
-  only_unread?: number;
-  title?: string;
-}
-
-export interface QueryUserInboxRecordListResp {
-  page: number;
-  page_size: number;
-  total: number;
-  unread_total: number;
-  list: any;
-}
-
 // 用户列表查询请求
 export interface QueryUserListReq extends ListQuery {
   page?: number; // 当前页码
@@ -1019,6 +1012,10 @@ export interface QueryUserListReq extends ListQuery {
   mobile?: string; // 手机号筛选
   status?: number; // 状态筛选
   keyword?: string; // 关键词搜索（昵称/手机号）
+}
+
+export interface QueryUserNotificationListReq extends ListQuery {
+  user_id: string;
 }
 
 export interface QueryVisitLogListReq extends ListQuery {
@@ -1030,10 +1027,22 @@ export interface QueryVisitLogListReq extends ListQuery {
   page_name?: string;
 }
 
+export interface ReadMeNotificationReq {
+  group_key: string;
+}
+
 export interface RefreshTokenReq {
   user_id: string; // 用户id
   grant_type: string; // 授权类型
   refresh_token: string; // 刷新令牌
+}
+
+export interface RedeliverDeliveryReq {
+  id: number;
+}
+
+export interface RedeliverEventReq {
+  id: number;
 }
 
 export interface RegionStatVO {
@@ -1082,7 +1091,7 @@ export interface RestorePhotoReq {
   ids: number[];
 }
 
-export interface RevokeNotifyMessageReq {
+export interface RevokeAnnouncementReq {
   id: number;
 }
 
@@ -1210,6 +1219,16 @@ export interface UpdateAlbumReq {
   status: number;
 }
 
+export interface UpdateAnnouncementReq {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  level: string;
+  target_type: string;
+  target_ids?: string;
+}
+
 export interface UpdateApiReq {
   id: number; // 主键id
   parent_id: number; // 分组id
@@ -1278,26 +1297,6 @@ export interface UpdateMenuReq extends MenuMeta {
   always_show?: number; // 是否一直显示菜单
   visible?: number; // 菜单是否可见
   status: number; // 状态 0正常 1禁用
-}
-
-export interface UpdateNotifyMessageReq {
-  id: number;
-  title: string;
-  content: string;
-  category: string;
-  level: string;
-  target_type: string;
-  target_ids?: string;
-}
-
-export interface UpdateNotifyTemplateReq {
-  id: number;
-  code: string;
-  channel: string;
-  scene: string;
-  title: string;
-  content: string;
-  enabled: number;
 }
 
 export interface UpdatePageReq {

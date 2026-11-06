@@ -79,7 +79,14 @@ const contentConfig: IContentConfig<QueryLoginLogListReq> = {
       templet: "custom",
     },
     {
-      label: "登录时间",
+      label: "事件",
+      prop: "event_type",
+      width: 90,
+      align: "center",
+      templet: "custom",
+    },
+    {
+      label: "事件时间",
       prop: "login_at",
       width: 140,
       align: "center",
@@ -87,12 +94,11 @@ const contentConfig: IContentConfig<QueryLoginLogListReq> = {
       dateFormat: "YYYY/MM/DD HH:mm:ss",
     },
     {
-      label: "登出时间",
-      prop: "logout_at",
-      width: 140,
+      label: "登出类型",
+      prop: "logout_type",
+      width: 120,
       align: "center",
-      templet: "date",
-      dateFormat: "YYYY/MM/DD HH:mm:ss",
+      templet: "custom",
     },
     {
       label: "操作栏",

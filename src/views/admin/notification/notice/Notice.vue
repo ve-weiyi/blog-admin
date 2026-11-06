@@ -69,7 +69,7 @@ import PageSearch from "@/components/CURD/PageSearch.vue";
 import PageModal from "@/components/CURD/PageModal.vue";
 import PageContent from "@/components/CURD/PageContent.vue";
 import { NoticeLevelEnum, NoticeTypeEnum, NotifyStatusEnum } from "@/enums/blog";
-import { NotifyMessageAPI } from "@/api";
+import { AnnouncementAPI } from "@/api";
 
 const {
   searchRef,
@@ -107,13 +107,13 @@ function handleOperateClick(data: IOperateData) {
 }
 
 function handlePublish(id: number) {
-  ElMessageBox.confirm("确认发布该通知？", "提示", {
+  ElMessageBox.confirm("确认发布该公告？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(() => {
-      NotifyMessageAPI.publishNotifyMessage({ id })
+      AnnouncementAPI.publishAnnouncement({ id })
         .then(() => {
           ElMessage.success("发布成功");
           contentRef.value?.handleRefresh();
@@ -124,13 +124,13 @@ function handlePublish(id: number) {
 }
 
 function handleRevoke(id: number) {
-  ElMessageBox.confirm("确认撤回该通知？", "提示", {
+  ElMessageBox.confirm("确认撤回该公告？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(() => {
-      NotifyMessageAPI.revokeNotifyMessage({ id })
+      AnnouncementAPI.revokeAnnouncement({ id })
         .then(() => {
           ElMessage.success("撤回成功");
           contentRef.value?.handleRefresh();

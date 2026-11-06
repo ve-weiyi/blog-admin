@@ -11,29 +11,22 @@
     <template #dropdown>
       <div class="p-5">
         <template v-if="list.length > 0">
-          <div v-for="item in list" :key="item.id" class="w-500px py-3">
+          <div v-for="item in list" :key="item.group_key" class="w-500px py-3">
             <div class="flex-y-center">
-              <el-badge v-if="item.status === 'unread'" is-dot class="!mr-1" />
+              <el-badge v-if="item.unread" is-dot class="!mr-1" />
               <span v-else class="w-8px mr-1" />
-              <el-tag v-if="item.category === 'system'" size="small" type="primary">系统</el-tag>
-              <el-tag v-else-if="item.category === 'maintenance'" size="small" type="warning">
-                维护
-              </el-tag>
-              <el-tag v-else-if="item.category === 'update'" size="small" type="success">
-                更新
-              </el-tag>
-              <el-tag v-else size="small" type="info">提醒</el-tag>
+              <el-tag :type="levelType(item.level)" size="small">{{ sceneLabel(item.scene) }}</el-tag>
               <el-text
                 size="small"
                 class="w-200px cursor-pointer !ml-2 !flex-1"
                 truncated
-                @click="read(item.id)"
+                @click="read(item)"
               >
                 {{ item.title }}
               </el-text>
 
               <div class="text-xs text-gray">
-                {{ formatDateTime(item.sent_at) }}
+                {{ formatDateTime(item.latest_at) }}
               </div>
             </div>
           </div>
@@ -67,12 +60,16 @@
       <div class="flex-y-center mb-16px text-13px text-color-secondary">
         <span class="flex-y-center">
           <el-icon><Timer /></el-icon>
-          {{ formatDateTime(detail.sent_at) }}
+          {{ formatDateTime(detail.latest_at) }}
         </span>
       </div>
 
       <div class="max-h-60vh pt-16px mb-24px overflow-y-auto border-t border-solid border-color">
-        <div v-html="detail.content"></div>
+        <div class="whitespace-pre-wrap">{{ detail.content }}</div>
+      </div>
+
+      <div v-if="detail.link" class="flex-x-end">
+        <el-link type="primary" underline="never" @click="openLink(detail.link)">查看详情</el-link>
       </div>
     </div>
   </el-dialog>
@@ -83,6 +80,39 @@ import { formatDateTime } from "@/utils/format";
 import { useNotice } from "./useNotice";
 
 const { list, unreadTotal, detail, dialogVisible, read, readAll, goMore } = useNotice();
+
+const sceneLabels: Record<string, string> = {
+  announcement: "公告",
+  "content.commented": "新评论",
+  "comment.replied": "回复",
+  "comment.liked": "评论获赞",
+  "article.liked": "文章获赞",
+  "talk.liked": "说说获赞",
+  "content.reviewed": "审核",
+  "account.security": "安全",
+};
+
+function sceneLabel(scene: string) {
+  return sceneLabels[scene] ?? "通知";
+}
+
+function levelType(level: string) {
+  switch (level) {
+    case "warning":
+      return "warning";
+    case "error":
+      return "danger";
+    case "success":
+      return "success";
+    default:
+      return "info";
+  }
+}
+
+/** 跳转地址由服务端渲染，客户端只负责打开 */
+function openLink(link: string) {
+  window.open(link, "_blank");
+}
 </script>
 
 <style lang="scss" scoped>

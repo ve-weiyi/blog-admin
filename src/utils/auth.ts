@@ -4,7 +4,7 @@ import { useUserStoreHook } from "@/stores/user";
 import router from "@/router";
 
 // 应用标识，随请求头下发
-export const APP_NAME = "blog";
+export const APP_NAME = "admin-web";
 
 // 负责本地凭证与偏好的读写
 export const AuthStorage = {

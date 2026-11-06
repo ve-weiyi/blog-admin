@@ -2,50 +2,41 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus";
 import router from "@/router";
-import { NotifyRecordAPI } from "@/api";
-import type { NotifyRecordVO } from "@/api/types";
-import { useUserStore } from "@/stores/user";
+import { MeNotificationAPI } from "@/api";
+import type { NotificationGroupVO } from "@/api/types";
 import { useNotificationStore } from "@/stores/notification";
 
 const PAGE_SIZE = 5;
 
 export function useNotice() {
-  const list = ref<NotifyRecordVO[]>([]);
-  const detail = ref<NotifyRecordVO | null>(null);
+  const list = ref<NotificationGroupVO[]>([]);
+  const detail = ref<NotificationGroupVO | null>(null);
   const dialogVisible = ref(false);
   const notificationStore = useNotificationStore();
   const { unreadTotal } = storeToRefs(notificationStore);
 
-  function getUserId(): string {
-    return useUserStore().userInfo.user_id;
-  }
-
+  // 收件人取自登录态，请求里不带 user_id
   function fetchList() {
-    const userId = getUserId();
-    if (!userId) return;
-
-    NotifyRecordAPI.queryUserInboxRecordList({
-      page: 1,
-      page_size: PAGE_SIZE,
-      user_id: userId,
-    }).then((res) => {
-      list.value = (res.data.list || []) as NotifyRecordVO[];
-      notificationStore.unreadTotal = res.data.unread_total || 0;
-    });
+    MeNotificationAPI.queryMeNotificationList({ page: 1, page_size: PAGE_SIZE })
+      .then((res) => {
+        list.value = (res.data.list || []) as NotificationGroupVO[];
+        notificationStore.refreshUnread();
+      })
+      .catch(() => {
+        // 拉取失败保留旧列表
+      });
   }
 
-  function read(id?: number) {
-    if (id == null) {
+  /** 打开一条：未读先置已读，再按服务端下发的跳转打开 */
+  function read(item?: NotificationGroupVO) {
+    if (!item) {
       return;
     }
-    const found = list.value.find((item) => item.id === id);
-    if (found) {
-      detail.value = found;
-      dialogVisible.value = true;
-      if (found.status === "unread" && found.id != null) {
-        found.status = "read";
-        notificationStore.markAsRead(found.id);
-      }
+    detail.value = item;
+    dialogVisible.value = true;
+    if (item.unread) {
+      item.unread = false;
+      notificationStore.markAsRead(item.group_key);
     }
   }
 
@@ -54,9 +45,7 @@ export function useNotice() {
   }
 
   function readAll() {
-    const userId = getUserId();
-    if (!userId) return;
-    notificationStore.markAllAsRead(userId).then(() => {
+    notificationStore.markAllAsRead().then(() => {
       ElMessage.success("已全部标记为已读");
       fetchList();
     });

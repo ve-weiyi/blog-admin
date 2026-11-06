@@ -19,8 +19,6 @@ const ReconcileIntervalMs = 5 * 60 * 1000;
  * 把断线期间的缺口补上——这是信号模型的自愈点。
  *
  * 幂等：重复调用只会让已存在的通道重连（connect 对连接中/已连接状态短路）。
- *
- * TODO: 未读数目前只在「我的通知」页可见；顶部入口 components/NoticeDropdown/ 是零引用死代码。
  */
 export function setupSse(): void {
   if (notifyChannel) {
@@ -33,7 +31,10 @@ export function setupSse(): void {
   });
 
   notifyChannel.subscribe<NotifyStreamFrame>("message", (frame) => {
-    if (frame?.event === SseEvents.NOTICE || frame?.event === SseEvents.NOTICE_REVOKE) {
+    if (
+      frame?.event === SseEvents.ANNOUNCEMENT_PUBLISHED ||
+      frame?.event === SseEvents.ANNOUNCEMENT_REVOKED
+    ) {
       refreshUnread();
     }
   });

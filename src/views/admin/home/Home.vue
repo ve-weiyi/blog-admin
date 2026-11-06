@@ -447,44 +447,118 @@ const avatarUrl = computed(() => {
 const vesionList = ref<VersionItem[]>([]);
 const versionLoading = ref(false);
 
+/** GitHub Releases 缓存键；结构变更时递增版本 */
+const ReleaseCacheKey = "blog-admin:releases:v1";
+/** 缓存有效期：6 小时 */
+const ReleaseCacheTTL = 6 * 60 * 60 * 1000;
+const ReleaseAPI = "https://api.github.com/repos/ve-weiyi/blog-cloud/releases";
+
+interface ReleaseCache {
+  etag: string;
+  fetchedAt: number;
+  releases: GitHubRelease[];
+}
+
+function readReleaseCache(): ReleaseCache | null {
+  try {
+    const text = localStorage.getItem(ReleaseCacheKey);
+    if (!text) {
+      return null;
+    }
+    const raw: unknown = JSON.parse(text);
+    if (!raw || typeof raw !== "object") {
+      return null;
+    }
+    const cache = raw as Partial<ReleaseCache>;
+    if (!Array.isArray(cache.releases) || typeof cache.fetchedAt !== "number") {
+      return null;
+    }
+    return {
+      etag: typeof cache.etag === "string" ? cache.etag : "",
+      fetchedAt: cache.fetchedAt,
+      releases: cache.releases as GitHubRelease[],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeReleaseCache(cache: ReleaseCache) {
+  try {
+    localStorage.setItem(ReleaseCacheKey, JSON.stringify(cache));
+  } catch {
+    // 存储不可用时忽略：缓存只是减少请求，不是功能依赖
+  }
+}
+
+function toVersionList(releases: GitHubRelease[]): VersionItem[] {
+  return releases
+    .filter((release) => !release.draft)
+    .slice(0, 10)
+    .map((release, index) => ({
+      id: release.id.toString(),
+      title: release.name || release.tag_name,
+      date: dayjs(release.published_at).format("YYYY-MM-DD HH:mm:ss"),
+      content:
+        release.body?.substring(0, 100) + (release.body?.length > 100 ? "..." : "") || "暂无描述",
+      link: release.html_url,
+      tag: index === 0 ? "最新版本" : release.prerelease ? "预发布" : "稳定版",
+    }));
+}
+
+function fallbackVersionItem(content: string): VersionItem {
+  return {
+    id: "1",
+    title: "获取失败",
+    date: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+    content,
+    link: "https://github.com/ve-weiyi/blog-cloud/releases",
+    tag: "错误",
+  };
+}
+
 /**
  * 获取 GitHub 仓库发布版本列表
+ *
+ * GitHub API 匿名限额为 60 次/小时/IP：先读 6 小时缓存；过期后带
+ * If-None-Match 条件请求，304 不消耗配额；请求失败时退回旧缓存。
  */
 const fetchGitHubReleases = async () => {
+  const cached = readReleaseCache();
+  if (cached && Date.now() - cached.fetchedAt < ReleaseCacheTTL) {
+    vesionList.value = toVersionList(cached.releases);
+    return;
+  }
+
   versionLoading.value = true;
   try {
-    const response = await fetch("https://api.github.com/repos/ve-weiyi/blog-cloud/releases");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+    if (cached?.etag) {
+      headers["If-None-Match"] = cached.etag;
     }
-    const releases: GitHubRelease[] = await response.json();
 
-    // 转换数据格式
-    vesionList.value = releases
-      .filter((release) => !release.draft) // 过滤掉草稿版本
-      .slice(0, 10) // 只取前10个版本
-      .map((release, index) => ({
-        id: release.id.toString(),
-        title: release.name || release.tag_name,
-        date: dayjs(release.published_at).format("YYYY-MM-DD HH:mm:ss"),
-        content:
-          release.body?.substring(0, 100) + (release.body?.length > 100 ? "..." : "") || "暂无描述",
-        link: release.html_url,
-        tag: index === 0 ? "最新版本" : release.prerelease ? "预发布" : "稳定版",
-      }));
+    const response = await fetch(ReleaseAPI, { headers });
+    if (response.status === 304 && cached) {
+      writeReleaseCache({ ...cached, fetchedAt: Date.now() });
+      vesionList.value = toVersionList(cached.releases);
+      return;
+    }
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const releases = (await response.json()) as GitHubRelease[];
+    writeReleaseCache({
+      etag: response.headers.get("etag") ?? "",
+      fetchedAt: Date.now(),
+      releases,
+    });
+    vesionList.value = toVersionList(releases);
   } catch (error) {
     console.error("获取 GitHub 发布版本失败:", error);
-    // 失败时使用默认数据
-    vesionList.value = [
-      {
-        id: "1",
-        title: "获取失败",
-        date: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-        content: "无法获取最新版本信息，请检查网络连接",
-        link: "https://github.com/ve-weiyi/blog-cloud/releases",
-        tag: "错误",
-      },
-    ];
+    vesionList.value = cached
+      ? toVersionList(cached.releases)
+      : [fallbackVersionItem("无法获取最新版本信息，请稍后重试或查看发布页")];
   } finally {
     versionLoading.value = false;
   }

@@ -1,10 +1,10 @@
 import type { IContentConfig } from "@/components/CURD/types";
-import type { QueryNotifyMessageListReq } from "@/api/types";
-import { NotifyMessageAPI } from "@/api";
+import type { QueryAnnouncementListReq } from "@/api/types";
+import { AnnouncementAPI } from "@/api";
 import { NotifyStatusEnum } from "@/enums/blog";
 
-const contentConfig: IContentConfig<QueryNotifyMessageListReq> = {
-  pageTitle: "通知管理",
+const contentConfig: IContentConfig<QueryAnnouncementListReq> = {
+  pageTitle: "公告管理",
   permPrefix: "website:notice",
   table: {
     border: true,
@@ -22,11 +22,11 @@ const contentConfig: IContentConfig<QueryNotifyMessageListReq> = {
       list: res.data.list || [],
     };
   },
-  indexAction(query: QueryNotifyMessageListReq) {
-    return NotifyMessageAPI.queryNotifyMessageList(query);
+  indexAction(query: QueryAnnouncementListReq) {
+    return AnnouncementAPI.queryAnnouncementList(query);
   },
   deleteAction(ids: string) {
-    return NotifyMessageAPI.batchDeleteNotifyMessage({
+    return AnnouncementAPI.batchDeleteAnnouncement({
       ids: ids.split(",").map((id) => parseInt(id)),
     });
   },
@@ -67,14 +67,14 @@ const contentConfig: IContentConfig<QueryNotifyMessageListReq> = {
       sortable: true,
     },
     {
-      label: "通知标题",
+      label: "公告标题",
       prop: "title",
       minWidth: 200,
       width: 0,
       align: "center",
     },
     {
-      label: "通知内容",
+      label: "公告内容",
       prop: "content",
       minWidth: 300,
       width: 0,
@@ -82,14 +82,14 @@ const contentConfig: IContentConfig<QueryNotifyMessageListReq> = {
       show: false,
     },
     {
-      label: "通知分类",
+      label: "公告分类",
       prop: "category",
       width: 120,
       align: "center",
       templet: "custom",
     },
     {
-      label: "通知等级",
+      label: "公告等级",
       prop: "level",
       width: 100,
       align: "center",

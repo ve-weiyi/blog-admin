@@ -14,22 +14,22 @@ export default {
   },
   children: [
     {
-      path: "/notification/template",
-      component: () => import("@/views/admin/notification/template/Template.vue"),
-      name: "NotifyTemplate",
-      meta: { title: "通知模板" },
-    },
-    {
       path: "/notification/notice",
       component: () => import("@/views/admin/notification/notice/Notice.vue"),
       name: "NotifyNotice",
-      meta: { title: "通知内容" },
+      meta: { title: "公告管理" },
     },
     {
       path: "/notification/message",
       component: () => import("@/views/admin/notification/record/Record.vue"),
       name: "NotifyRecord",
-      meta: { title: "消息记录" },
+      meta: { title: "投递记录" },
+    },
+    {
+      path: "/notification/event",
+      component: () => import("@/views/admin/notification/event/Event.vue"),
+      name: "NotificationEvent",
+      meta: { title: "通知事件" },
     },
   ],
 } satisfies RouteRecordRaw;

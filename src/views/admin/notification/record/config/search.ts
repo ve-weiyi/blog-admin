@@ -15,9 +15,9 @@ const searchConfig: ISearchConfig = {
         },
       },
       options: [
-        { label: "站内消息", value: "inbox" },
-        { label: "短信", value: "sms" },
         { label: "邮件", value: "email" },
+        { label: "短信", value: "sms" },
+        { label: "推送", value: "push" },
       ],
     },
     {
@@ -32,11 +32,10 @@ const searchConfig: ISearchConfig = {
         },
       },
       options: [
-        { label: "未读", value: "unread" },
-        { label: "已读", value: "read" },
         { label: "待发送", value: "pending" },
         { label: "已发送", value: "sent" },
         { label: "发送失败", value: "failed" },
+        { label: "已取消", value: "cancelled" },
       ],
     },
     {

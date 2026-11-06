@@ -11,7 +11,7 @@ const searchConfig: ISearchConfig = {
   formItems: [
     {
       type: "select",
-      label: "通知分类",
+      label: "公告分类",
       prop: "category",
       attrs: {
         placeholder: "全部",
@@ -22,14 +22,14 @@ const searchConfig: ISearchConfig = {
       },
       options: [
         { label: "系统公告", value: NoticeTypeEnum.SYSTEM },
-        { label: "维护通知", value: NoticeTypeEnum.MAINTENANCE },
+        { label: "维护公告", value: NoticeTypeEnum.MAINTENANCE },
         { label: "功能更新", value: NoticeTypeEnum.UPDATE },
         { label: "重要提醒", value: NoticeTypeEnum.REMIND },
       ],
     },
     {
       type: "select",
-      label: "通知等级",
+      label: "公告等级",
       prop: "level",
       attrs: {
         placeholder: "全部",

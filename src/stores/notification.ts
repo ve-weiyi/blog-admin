@@ -1,20 +1,27 @@
 import { store } from "@/stores";
-import { NotifyRecordAPI } from "@/api";
+import { MeNotificationAPI } from "@/api";
 import { AuthStorage } from "@/utils/auth";
 
+/**
+ * 我的通知
+ *
+ * 未读数由服务端派生，客户端只负责取回；不做本地加减，避免与服务端漂移。
+ * 实时信号只是提醒，拉取失败时保留旧值——闪回 0 比慢一拍更打扰人。
+ */
 export const useNotificationStore = defineStore("notification", () => {
   const unreadTotal = ref(0);
 
-  function markAsRead(id: number) {
+  /** 标记一组已读：组键由服务端下发，客户端不自己拼 */
+  function markAsRead(groupKey: string) {
     const prev = unreadTotal.value;
     unreadTotal.value = Math.max(0, unreadTotal.value - 1);
-    NotifyRecordAPI.markRecordRead({ id }).catch(() => {
+    MeNotificationAPI.readMeNotification({ group_key: groupKey }).catch(() => {
       unreadTotal.value = prev;
     });
   }
 
-  function markAllAsRead(userId: string) {
-    return NotifyRecordAPI.markAllRecordsRead({ user_id: userId }).then(() => {
+  function markAllAsRead() {
+    return MeNotificationAPI.readAllMeNotification().then(() => {
       unreadTotal.value = 0;
     });
   }
@@ -24,7 +31,7 @@ export const useNotificationStore = defineStore("notification", () => {
   let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
-   * 重新拉取未读数（防抖 300ms，只取未读数故 page_size 取 1）
+   * 重新拉取未读数（防抖 300ms）
    *
    * 返回的 Promise 在请求发出前即已 resolve——调用方只关心"已安排刷新"。
    */
@@ -35,19 +42,14 @@ export const useNotificationStore = defineStore("notification", () => {
     refreshTimer = setTimeout(async () => {
       refreshTimer = null;
       // 凭据只从 AuthStorage 读：userInfo 是异步回填的展示态缓存
-      const userId = AuthStorage.getUid();
-      if (!userId) {
+      if (!AuthStorage.getUid()) {
         return;
       }
       try {
-        const res = await NotifyRecordAPI.queryUserInboxRecordList({
-          page: 1,
-          page_size: 1,
-          user_id: userId,
-        });
-        unreadTotal.value = res.data.unread_total || 0;
+        const res = await MeNotificationAPI.getMeUnreadCount();
+        unreadTotal.value = res.data.total || 0;
       } catch {
-        // 拉取失败保留旧值：推送只是提醒，失败不该打扰用户
+        // 拉取失败保留旧值
       }
     }, RefreshDebounceMs);
     return Promise.resolve();

@@ -14,6 +14,10 @@
       </div>
     </template>
 
+    <div class="layout-toolbar__item layout-toolbar__item--notice">
+      <NoticeDropdown />
+    </div>
+
     <div class="layout-toolbar__item layout-toolbar__item--profile">
       <el-dropdown trigger="click">
         <div class="layout-user">
@@ -50,6 +54,7 @@ import { useAppStore, useSettingsStore, useUserStore } from "@/stores";
 import CommandPalette from "@/components/CommandPalette/index.vue";
 import Fullscreen from "@/components/Fullscreen/index.vue";
 import SizeSelect from "@/components/SizeSelect/index.vue";
+import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 
 const appStore = useAppStore();
 const settingStore = useSettingsStore();

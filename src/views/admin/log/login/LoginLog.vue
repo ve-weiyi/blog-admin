@@ -23,6 +23,13 @@
       <template #guest_info="scope">
         <GuestInfo :guest="scope.row.guest_info" />
       </template>
+      <template #event_type="scope">
+        <el-tag v-if="scope.row.event_type === 1" type="success">登录</el-tag>
+        <el-tag v-else type="info">登出</el-tag>
+      </template>
+      <template #logout_type="scope">
+        <span>{{ scope.row.logout_type || "-" }}</span>
+      </template>
       <template #login_type="scope">
         <el-tag v-if="scope.row.login_type === LoginTypeEnum.USERNAME" type="success">
           用户名

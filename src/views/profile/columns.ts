@@ -30,18 +30,13 @@ export const loginHistoryColumns: Column<LoginLogVO>[] = [
     },
   },
   {
-    key: "logout_at",
-    dataKey: "logout_at",
-    title: "登出时间",
+    key: "event_type",
+    dataKey: "event_type",
+    title: "事件",
     align: "center",
-    width: 160,
+    width: 100,
     cellRenderer: (row): VNode => {
-      return h(
-        "span",
-        row.rowData.logout_at
-          ? useDateFormat(row.rowData.logout_at, "YYYY-MM-DD HH:mm:ss").value
-          : "-"
-      );
+      return h("span", row.rowData.event_type === 1 ? "登录" : "登出");
     },
   },
 ];
